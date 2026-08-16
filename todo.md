@@ -45,10 +45,10 @@
 - [x] Add notification environment-variable documentation and safe fallback behavior when credentials are absent.
 - [x] Add notification setup documentation listing RESEND_API_KEY, NOTIFICATION_FROM_EMAIL, optional TWILIO_ENABLED, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_FROM, including fallback behavior when credentials are missing.
 
-- [ ] Evaluate Firebase Firestore, Authentication, and Storage as an alternative to the current database/auth/storage stack.
-- [ ] Decide whether Firebase migration is recommended for this project and document tradeoffs.
+- [x] Evaluate Firebase Firestore, Authentication, and Storage as an alternative to the current database/auth/storage stack.
+- [x] Decide whether Firebase migration is recommended for this project and document tradeoffs.
 - [x] Add a simple Arabic/English language switcher available from every portal.
-- [ ] Add RTL layout support for Arabic and LTR layout support for English.
+- [x] Add RTL layout support for Arabic and LTR layout support for English.
 - [ ] Rewrite portal labels, actions, statuses, and empty states in clear bilingual language.
 - [x] Simplify navigation so each role sees only the most important actions.
 - [x] Test Arabic text rendering, RTL alignment, responsive behavior, and language persistence.
