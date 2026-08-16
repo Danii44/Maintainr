@@ -17,8 +17,8 @@
 - [x] Implement Tenant ticket submission with category, description, media upload, and preferred access time.
 - [x] Implement the mobile-optimized Technician assigned-jobs portal sorted by urgency.
 - [x] Implement Technician job detail, status transitions, proof-photo upload, and mandatory resolution notes.
-- [ ] Prevent a ticket from reaching RESOLVED without both proof photo and resolution notes.
-- [ ] Implement full ticket lifecycle transitions and TicketLog audit records.
+- [x] Prevent a ticket from reaching RESOLVED without both proof photo and resolution notes.
+- [x] Implement full ticket lifecycle transitions and TicketLog audit records.
 - [x] Implement secure photo/video storage integration for ticket media.
 - [x] Implement transactional email notifications for ticket creation, assignment, status changes, and resolution.
 - [x] Build four visually distinct dark professional portal layouts with responsive Tailwind/Shadcn UI.
@@ -27,11 +27,11 @@
 - [x] Run type checks, tests, and browser visual verification.
 - [ ] Create a final project checkpoint after all completed items are marked done.
 
-- [ ] Implement real sign-in and sign-up routes with authenticated account creation.
-- [ ] Complete /join-unit account-to-unit binding with database persistence.
+- [x] Implement real sign-in and sign-up routes with authenticated account creation.
+- [x] Complete /join-unit account-to-unit binding with database persistence.
 - [ ] Replace hardcoded seedTickets with database-backed queries and mutations.
-- [ ] Add full ticket filtering by status, priority, and category.
-- [ ] Implement searchable tenant history with persisted ticket data.
+- [x] Add full ticket filtering by status, priority, and category.
+- [x] Implement searchable tenant history with persisted ticket data.
 - [x] Implement ticket submission server actions and real storage uploads.
 - [x] Enforce technician completion and RESOLVED validation on the backend.
 - [x] Persist status changes and TicketLog audit records through server procedures.
@@ -86,3 +86,5 @@
 - [ ] Handle partial tenant media upload failures separately from successful ticket creation.
 - [ ] Add per-file tenant media upload progress, success, failure, and retry states.
 - [ ] Add focused tenant ticket-plus-multi-file attachment verification, including attachment failure handling.
+- [x] Verify and document that sign-up creates a new account through the OAuth callback and user upsert flow.
+- [ ] Add focused sign-in versus sign-up route validation and first-time onboarding coverage.
