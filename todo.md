@@ -33,12 +33,12 @@
 - [ ] Add full ticket filtering by status, priority, and category.
 - [ ] Implement searchable tenant history with persisted ticket data.
 - [ ] Implement ticket submission server actions and real storage uploads.
-- [ ] Enforce technician completion and RESOLVED validation on the backend.
-- [ ] Persist status changes and TicketLog audit records through server procedures.
+- [x] Enforce technician completion and RESOLVED validation on the backend.
+- [x] Persist status changes and TicketLog audit records through server procedures.
 - [ ] Expand Vitest coverage to role guards, lifecycle transitions, and backend completion enforcement.
-- [ ] Restrict ticket status mutations by role and organization and enforce allowed status transitions server-side.
-- [ ] Block all RESOLVED updates unless proof media and resolution notes are present, regardless of mutation path.
-- [ ] Create TicketLog entries for ticket creation and every lifecycle transition consistently.
+- [x] Restrict ticket status mutations by role and organization and enforce allowed status transitions server-side.
+- [x] Block all RESOLVED updates unless proof media and resolution notes are present, regardless of mutation path.
+- [x] Create TicketLog entries for ticket creation and every lifecycle transition consistently.
 - [ ] Add backend tests for lifecycle transitions, organization scoping, and RESOLVED validation bypass attempts.
 - [x] Configure email-only notifications as the default free-path delivery channel.
 - [x] Keep Twilio SMS/WhatsApp support optional behind environment variables and a feature toggle.
@@ -66,3 +66,9 @@
 - [ ] Replace seedTickets across manager, tenant, technician, and owner portals with authenticated tRPC queries and mutations.
 - [ ] Connect tenant media uploads and technician proof-photo uploads to the secure storage procedure and persist TicketMedia records.
 - [ ] Perform explicit Arabic-mode QA by switching to Arabic and validating RTL layouts across all portals at desktop and mobile sizes.
+- [x] Add the missing RESOLVED to CLOSED server transition and verify all required status paths.
+- [x] Create TicketLog entries for ticket creation and every lifecycle transition consistently.
+- [ ] Replace the hardcoded technician ticket ID with the selected persisted ticket ID for upload and completion.
+- [ ] Add backend tests for ticket creation logs, RESOLVED to CLOSED, organization scoping, and completion bypass attempts.
+- [x] Align shared lifecycle rules with server rules so only RESOLVED can transition to CLOSED.
+- [ ] Add mutation-level tests for valid RESOLVED-to-CLOSED and invalid direct-close bypass paths.

@@ -14,7 +14,7 @@ export function canMarkResolved(input: { proofPhotoUrl?: string | null; resoluti
 const allowedTransitions: Record<string, string[]> = {
   OPEN: ["ASSIGNED"],
   ASSIGNED: ["IN_PROGRESS", "OPEN"],
-  IN_PROGRESS: ["ASSIGNED", "CLOSED"],
+  IN_PROGRESS: ["ASSIGNED"],
   RESOLVED: ["CLOSED"],
   CLOSED: [],
 };

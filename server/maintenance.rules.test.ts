@@ -12,6 +12,9 @@ describe("maintenance business rules", () => {
   it("enforces the ticket lifecycle sequence", () => {
     expect(canTransitionStatus("OPEN", "ASSIGNED")).toBe(true);
     expect(canTransitionStatus("ASSIGNED", "IN_PROGRESS")).toBe(true);
+    expect(canTransitionStatus("RESOLVED", "CLOSED")).toBe(true);
+    expect(canTransitionStatus("IN_PROGRESS", "CLOSED")).toBe(false);
+    expect(canTransitionStatus("CLOSED", "RESOLVED")).toBe(false);
     expect(canTransitionStatus("OPEN", "RESOLVED")).toBe(false);
     expect(canTransitionStatus("CLOSED", "IN_PROGRESS")).toBe(false);
   });

@@ -119,7 +119,7 @@ export const appRouter = router({
       if (input.status === "RESOLVED") throw new Error("Use technician completion with proof and notes to resolve tickets");
       if (ctx.user.role === "TENANT" && ticket.submittedById !== ctx.user.id) throw new Error("Tenant can only update their own ticket");
       if (ctx.user.role === "TECHNICIAN" && ticket.assignedToId !== ctx.user.id) throw new Error("Technician is not assigned to this ticket");
-      const allowed: Record<string, string[]> = { OPEN: ["ASSIGNED"], ASSIGNED: ["IN_PROGRESS", "OPEN"], IN_PROGRESS: ["ASSIGNED", "CLOSED"], CLOSED: [] };
+      const allowed: Record<string, string[]> = { OPEN: ["ASSIGNED"], ASSIGNED: ["IN_PROGRESS", "OPEN"], IN_PROGRESS: ["ASSIGNED"], RESOLVED: ["CLOSED"], CLOSED: [] };
       if (!allowed[ticket.status]?.includes(input.status)) throw new Error(`Invalid transition from ${ticket.status} to ${input.status}`);
       await db.update(tickets).set({ status: input.status }).where(eq(tickets.id, input.ticketId));
       await db.insert(ticketLogs).values({ ticketId: input.ticketId, actorId: ctx.user.id, action: "STATUS_CHANGED", message: `Status changed from ${ticket.status} to ${input.status}` });
