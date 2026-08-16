@@ -68,7 +68,15 @@
 - [ ] Perform explicit Arabic-mode QA by switching to Arabic and validating RTL layouts across all portals at desktop and mobile sizes.
 - [x] Add the missing RESOLVED to CLOSED server transition and verify all required status paths.
 - [x] Create TicketLog entries for ticket creation and every lifecycle transition consistently.
-- [ ] Replace the hardcoded technician ticket ID with the selected persisted ticket ID for upload and completion.
+- [x] Replace the hardcoded technician ticket ID with the selected persisted ticket ID for upload and completion.
 - [ ] Add backend tests for ticket creation logs, RESOLVED to CLOSED, organization scoping, and completion bypass attempts.
 - [x] Align shared lifecycle rules with server rules so only RESOLVED can transition to CLOSED.
 - [ ] Add mutation-level tests for valid RESOLVED-to-CLOSED and invalid direct-close bypass paths.
+- [x] Initialize technician detail state from the first live assigned job instead of defaulting to 1046.
+- [x] Drive technician detail title, unit, category, priority, and status from the selected live job.
+- [x] Verify technician selection keeps proof upload and completion mutations aligned with the displayed job.
+- [x] Sync technician detail status whenever the selected live job changes.
+- [ ] Add focused verification that technician selection keeps displayed job, proof upload, and completion target aligned.
+- [x] Audit the technician detail pane for remaining hardcoded job content.
+- [x] Drive technician header summary, current time metadata, and current-job context from selected live data or neutral localized labels instead of fixed job-specific copy.
+- [ ] Add focused technician selection verification for displayed job, proof upload target, and completion target alignment.
