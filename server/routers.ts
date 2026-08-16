@@ -8,6 +8,8 @@ import { getDb } from "./db";
 import { ticketLogs, ticketMedia, tickets, units, users } from "../drizzle/schema";
 import { sendTicketEmail } from "./notifications";
 import { storagePut } from "./storage";
+import { canMutateManagerTicket } from "../shared/managerActionRules";
+import { completionMutationError, statusMutationError } from "../shared/ticketMutationRules";
 
 const category = z.enum(["PLUMBING", "ELECTRICAL", "HVAC", "APPLIANCE", "OTHER"]);
 const priority = z.enum(["LOW", "MEDIUM", "HIGH", "EMERGENCY"]);
@@ -32,7 +34,7 @@ export const appRouter = router({
     }),
   }),
   onboarding: router({
-    joinUnit: protectedProcedure.input(z.object({ accessCode: z.string().regex(/^\\d{6}$/, "Access code must be exactly 6 digits") })).mutation(async ({ ctx, input }) => {
+    joinUnit: protectedProcedure.input(z.object({ accessCode: z.string().regex(/^\d{6}$/, "Access code must be exactly 6 digits") })).mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) throw new Error("Database unavailable");
       const match = await db.select().from(units).where(eq(units.accessCode, input.accessCode)).limit(1);
@@ -59,6 +61,7 @@ export const appRouter = router({
       await sendTicketEmail({ event: "TICKET_ASSIGNED", recipientEmail: input.email, subject: "You have been invited as a Maintainr technician", text: `Hello ${input.name}, your field technician invitation is ready. Sign in to access assigned jobs.` });
       return { success: true, userId: Number(result[0].insertId) };
     }),
+    listTechnicians: managerOnly.query(async ({ ctx }) => { const db = await getDb(); if (!db || !ctx.user.organizationId) throw new Error("Database or organization unavailable"); return db.select({ id: users.id, name: users.name, email: users.email }).from(users).where(and(eq(users.organizationId, ctx.user.organizationId), eq(users.role, "TECHNICIAN"))); }),
     generateUnitCode: managerOnly.input(z.object({ unitId: z.number().int().positive() })).mutation(async ({ input }) => {
       const db = await getDb();
       if (!db) throw new Error("Database unavailable");
@@ -105,22 +108,21 @@ export const appRouter = router({
       if (!db) throw new Error("Database unavailable");
       const current = await db.select().from(tickets).where(and(eq(tickets.id, input.ticketId), eq(tickets.organizationId, ctx.user.organizationId!))).limit(1);
       if (!current[0]) throw new Error("Ticket not found in your organization");
+      if (!canMutateManagerTicket({ ticketId: input.ticketId, technicianId: input.technicianId, organizationId: ctx.user.organizationId, ticketOrganizationId: current[0].organizationId })) throw new Error("Manager action is not authorized for this organization");
       await db.update(tickets).set({ assignedToId: input.technicianId, status: "ASSIGNED", priority: input.priority }).where(eq(tickets.id, input.ticketId));
       await db.insert(ticketLogs).values({ ticketId: input.ticketId, actorId: ctx.user.id, action: "ASSIGNED", message: `Assigned technician ${input.technicianId}` });
       await sendTicketEmail({ event: "TICKET_ASSIGNED", recipientEmail: ctx.user.email, subject: `Ticket ${input.ticketId} assigned`, text: `A technician was assigned to ticket ${input.ticketId}.` });
       return { success: true };
     }),
+    setPriority: managerOnly.input(z.object({ ticketId: z.number().int().positive(), priority })).mutation(async ({ ctx, input }) => { const db = await getDb(); if (!db || !ctx.user.organizationId) throw new Error("Database or organization unavailable"); const current = await db.select().from(tickets).where(and(eq(tickets.id, input.ticketId), eq(tickets.organizationId, ctx.user.organizationId))).limit(1); if (!current[0]) throw new Error("Ticket not found in your organization"); if (!canMutateManagerTicket({ ticketId: input.ticketId, organizationId: ctx.user.organizationId, ticketOrganizationId: current[0].organizationId })) throw new Error("Manager action is not authorized for this organization"); await db.update(tickets).set({ priority: input.priority }).where(eq(tickets.id, input.ticketId)); await db.insert(ticketLogs).values({ ticketId: input.ticketId, actorId: ctx.user.id, action: "PRIORITY_CHANGED", message: `Priority changed to ${input.priority}` }); return { success: true }; }),
     updateStatus: protectedProcedure.input(z.object({ ticketId: z.number().int().positive(), status })).mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db || !ctx.user.organizationId) throw new Error("Database or organization unavailable");
       const current = await db.select().from(tickets).where(and(eq(tickets.id, input.ticketId), eq(tickets.organizationId, ctx.user.organizationId))).limit(1);
       const ticket = current[0];
       if (!ticket) throw new Error("Ticket not found in your organization");
-      if (input.status === "RESOLVED") throw new Error("Use technician completion with proof and notes to resolve tickets");
-      if (ctx.user.role === "TENANT" && ticket.submittedById !== ctx.user.id) throw new Error("Tenant can only update their own ticket");
-      if (ctx.user.role === "TECHNICIAN" && ticket.assignedToId !== ctx.user.id) throw new Error("Technician is not assigned to this ticket");
-      const allowed: Record<string, string[]> = { OPEN: ["ASSIGNED"], ASSIGNED: ["IN_PROGRESS", "OPEN"], IN_PROGRESS: ["ASSIGNED"], RESOLVED: ["CLOSED"], CLOSED: [] };
-      if (!allowed[ticket.status]?.includes(input.status)) throw new Error(`Invalid transition from ${ticket.status} to ${input.status}`);
+      const mutationError = statusMutationError({ actorRole: ctx.user.role as "PROPERTY_MANAGER" | "TENANT" | "TECHNICIAN", actorId: ctx.user.id, organizationId: ctx.user.organizationId, ticketOrganizationId: ticket.organizationId, submittedById: ticket.submittedById, assignedToId: ticket.assignedToId, from: ticket.status, to: input.status });
+      if (mutationError) throw new Error(mutationError);
       await db.update(tickets).set({ status: input.status }).where(eq(tickets.id, input.ticketId));
       await db.insert(ticketLogs).values({ ticketId: input.ticketId, actorId: ctx.user.id, action: "STATUS_CHANGED", message: `Status changed from ${ticket.status} to ${input.status}` });
       await sendTicketEmail({ event: "STATUS_CHANGED", recipientEmail: ctx.user.email, subject: `Ticket ${input.ticketId} status updated`, text: `Status changed from ${ticket.status} to ${input.status}.` });
@@ -133,8 +135,8 @@ export const appRouter = router({
       if (!db) throw new Error("Database unavailable");
       const current = await db.select().from(tickets).where(and(eq(tickets.id, input.ticketId), eq(tickets.assignedToId, ctx.user.id))).limit(1);
       const ticket = current[0];
-      if (!ticket || !ctx.user.organizationId || ticket.organizationId !== ctx.user.organizationId) throw new Error("Assigned ticket not found in your organization");
-      if (ticket.status !== "IN_PROGRESS" && ticket.status !== "ASSIGNED") throw new Error("Only assigned or in-progress tickets can be resolved");
+      const completionError = completionMutationError({ organizationId: ctx.user.organizationId, ticketOrganizationId: ticket?.organizationId, assignedToId: ticket?.assignedToId, actorId: ctx.user.id, status: ticket?.status ?? "MISSING", proofPhotoUrl: input.proofPhotoUrl, resolutionNotes: input.resolutionNotes });
+      if (completionError) throw new Error(completionError);
       await db.update(tickets).set({ status: "RESOLVED", resolutionNotes: input.resolutionNotes, resolvedAt: new Date() }).where(eq(tickets.id, input.ticketId));
       await db.insert(ticketLogs).values({ ticketId: input.ticketId, actorId: ctx.user.id, action: "RESOLVED", message: `Resolution completed with proof photo: ${input.proofPhotoUrl}` });
       await sendTicketEmail({ event: "TICKET_RESOLVED", recipientEmail: ctx.user.email, subject: `Ticket ${input.ticketId} resolved`, text: input.resolutionNotes });

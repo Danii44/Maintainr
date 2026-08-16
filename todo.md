@@ -10,8 +10,8 @@
 - [x] Enforce exactly six digits for Unit Access Code values.
 - [x] Implement the Property Manager dashboard with Kanban and list views.
 - [x] Implement ticket filters for status, priority, and category.
-- [ ] Implement technician assignment and priority quick actions.
-- [ ] Implement manager user management for tenant creation, unit-code generation, and technician invitations.
+- [x] Implement technician assignment and priority quick actions.
+- [x] Implement manager user management for tenant creation, unit-code generation, and technician invitations.
 - [x] Implement the Tenant active-ticket progress dashboard.
 - [x] Implement searchable Tenant maintenance history.
 - [x] Implement Tenant ticket submission with category, description, media upload, and preferred access time.
@@ -23,23 +23,23 @@
 - [x] Implement transactional email notifications for ticket creation, assignment, status changes, and resolution.
 - [x] Build four visually distinct dark professional portal layouts with responsive Tailwind/Shadcn UI.
 - [x] Add Framer Motion micro-interactions for status transitions, modals, and progress updates.
-- [ ] Add Vitest coverage for core authorization, validation, lifecycle, and completion rules.
+- [x] Add Vitest coverage for core authorization, validation, lifecycle, and completion rules.
 - [x] Run type checks, tests, and browser visual verification.
 - [ ] Create a final project checkpoint after all completed items are marked done.
 
 - [x] Implement real sign-in and sign-up routes with authenticated account creation.
 - [x] Complete /join-unit account-to-unit binding with database persistence.
-- [ ] Replace hardcoded seedTickets with database-backed queries and mutations.
+- [x] Replace hardcoded seedTickets with database-backed queries and mutations.
 - [x] Add full ticket filtering by status, priority, and category.
 - [x] Implement searchable tenant history with persisted ticket data.
 - [x] Implement ticket submission server actions and real storage uploads.
 - [x] Enforce technician completion and RESOLVED validation on the backend.
 - [x] Persist status changes and TicketLog audit records through server procedures.
-- [ ] Expand Vitest coverage to role guards, lifecycle transitions, and backend completion enforcement.
+- [x] Expand Vitest coverage to role guards, lifecycle transitions, and backend completion enforcement.
 - [x] Restrict ticket status mutations by role and organization and enforce allowed status transitions server-side.
 - [x] Block all RESOLVED updates unless proof media and resolution notes are present, regardless of mutation path.
 - [x] Create TicketLog entries for ticket creation and every lifecycle transition consistently.
-- [ ] Add backend tests for lifecycle transitions, organization scoping, and RESOLVED validation bypass attempts.
+- [x] Add backend tests for lifecycle transitions, organization scoping, and RESOLVED validation bypass attempts.
 - [x] Configure email-only notifications as the default free-path delivery channel.
 - [x] Keep Twilio SMS/WhatsApp support optional behind environment variables and a feature toggle.
 - [x] Add notification environment-variable documentation and safe fallback behavior when credentials are absent.
@@ -63,15 +63,15 @@
 - [ ] Localize status, priority, category labels, form placeholders, toast messages, and help text.
 - [ ] Audit Arabic mode across sidebars, headers, tables, cards, forms, spacing, and alignment for RTL correctness.
 - [x] Wire /join-unit UI to the backend onboarding procedure and persist unit binding before redirecting tenants.
-- [ ] Replace seedTickets across manager, tenant, technician, and owner portals with authenticated tRPC queries and mutations.
+- [x] Replace seedTickets across manager, tenant, technician, and owner portals with authenticated tRPC queries and mutations.
 - [x] Connect tenant media uploads and technician proof-photo uploads to the secure storage procedure and persist TicketMedia records.
 - [ ] Perform explicit Arabic-mode QA by switching to Arabic and validating RTL layouts across all portals at desktop and mobile sizes.
 - [x] Add the missing RESOLVED to CLOSED server transition and verify all required status paths.
 - [x] Create TicketLog entries for ticket creation and every lifecycle transition consistently.
 - [x] Replace the hardcoded technician ticket ID with the selected persisted ticket ID for upload and completion.
-- [ ] Add backend tests for ticket creation logs, RESOLVED to CLOSED, organization scoping, and completion bypass attempts.
+- [x] Add backend tests for ticket creation logs, RESOLVED to CLOSED, organization scoping, and completion bypass attempts.
 - [x] Align shared lifecycle rules with server rules so only RESOLVED can transition to CLOSED.
-- [ ] Add mutation-level tests for valid RESOLVED-to-CLOSED and invalid direct-close bypass paths.
+- [x] Add mutation-level tests for valid RESOLVED-to-CLOSED and invalid direct-close bypass paths.
 - [x] Initialize technician detail state from the first live assigned job instead of defaulting to 1046.
 - [x] Drive technician detail title, unit, category, priority, and status from the selected live job.
 - [x] Verify technician selection keeps proof upload and completion mutations aligned with the displayed job.
@@ -87,4 +87,22 @@
 - [ ] Add per-file tenant media upload progress, success, failure, and retry states.
 - [ ] Add focused tenant ticket-plus-multi-file attachment verification, including attachment failure handling.
 - [x] Verify and document that sign-up creates a new account through the OAuth callback and user upsert flow.
-- [ ] Add focused sign-in versus sign-up route validation and first-time onboarding coverage.
+- [x] Add focused sign-in versus sign-up route validation and first-time onboarding coverage.
+- [x] Replace the manager ticket-card window.prompt assignment flow with a proper selectable technician UI, validation, loading, and error states.
+- [x] Expose manager assignment and priority actions consistently in Kanban and list views.
+- [x] Add focused tests or verification for invalid technician IDs and organization-scoped assignment and priority mutations.
+- [x] Add technician-query loading, empty, and error states to manager assignment controls.
+- [x] Scope manager technician selection per ticket and show visible pending feedback during assignment.
+- [x] Make list-view assignment controls self-contained with their own technician selector.
+
+- [x] Add router/backend tests for tickets.updateStatus and technician.complete covering organization scoping, invalid transitions, RESOLVED bypass rejection, and RESOLVED-to-CLOSED.
+- [x] Remove the remaining landing-page seedTickets usage or replace it with clearly non-ticket marketing content.
+- [x] Add focused auth verification proving /sign-in launches signIn, /sign-up launches signUp, and first-time tenants complete /join-unit onboarding.
+- [x] Update AUTH_FLOW.md to document the distinct sign-in and sign-up OAuth modes.
+- [ ] Add tenant per-file retry and progress state after partial media upload failures.
+
+- [x] Add a direct tRPC caller test proving tickets.updateStatus rejects status=RESOLVED and routes completion through technician.complete.
+- [x] Add a direct tRPC caller test proving tickets.updateStatus rejects cross-organization ticket access.
+- [x] Add a tickets.create backend test asserting TicketLog creation on ticket creation and lifecycle audit continuity.
+
+- [x] Fix mobile landing header overflow so brand and actions remain visible at narrow widths.
