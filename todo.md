@@ -1,0 +1,42 @@
+# Project TODO
+
+- [x] Establish the multi-tenant data model for Organizations, Properties, Units, Users, Tickets, TicketMedia, and TicketLog.
+- [x] Preserve the exact role labels PROPERTY_MANAGER, TENANT, TECHNICIAN, and FLAT_OWNER.
+- [x] Preserve the exact ticket category values PLUMBING, ELECTRICAL, HVAC, APPLIANCE, and OTHER.
+- [x] Preserve the exact ticket priority values LOW, MEDIUM, HIGH, and EMERGENCY.
+- [x] Preserve the exact ticket status values OPEN, ASSIGNED, IN_PROGRESS, RESOLVED, and CLOSED.
+- [ ] Implement role-based access control and route guards for all four portals.
+- [ ] Implement sign-in, sign-up, and the /join-unit onboarding flow.
+- [x] Enforce exactly six digits for Unit Access Code values.
+- [ ] Implement the Property Manager dashboard with Kanban and list views.
+- [ ] Implement ticket filters for status, priority, and category.
+- [ ] Implement technician assignment and priority quick actions.
+- [ ] Implement manager user management for tenant creation, unit-code generation, and technician invitations.
+- [ ] Implement the Tenant active-ticket progress dashboard.
+- [ ] Implement searchable Tenant maintenance history.
+- [ ] Implement Tenant ticket submission with category, description, media upload, and preferred access time.
+- [ ] Implement the mobile-optimized Technician assigned-jobs portal sorted by urgency.
+- [ ] Implement Technician job detail, status transitions, proof-photo upload, and mandatory resolution notes.
+- [ ] Prevent a ticket from reaching RESOLVED without both proof photo and resolution notes.
+- [ ] Implement full ticket lifecycle transitions and TicketLog audit records.
+- [ ] Implement secure photo/video storage integration for ticket media.
+- [ ] Implement transactional email notifications for ticket creation, assignment, status changes, and resolution.
+- [x] Build four visually distinct dark professional portal layouts with responsive Tailwind/Shadcn UI.
+- [x] Add Framer Motion micro-interactions for status transitions, modals, and progress updates.
+- [ ] Add Vitest coverage for core authorization, validation, lifecycle, and completion rules.
+- [x] Run type checks, tests, and browser visual verification.
+- [ ] Create a final project checkpoint after all completed items are marked done.
+
+- [ ] Implement real sign-in and sign-up routes with authenticated account creation.
+- [ ] Complete /join-unit account-to-unit binding with database persistence.
+- [ ] Replace hardcoded seedTickets with database-backed queries and mutations.
+- [ ] Add full ticket filtering by status, priority, and category.
+- [ ] Implement searchable tenant history with persisted ticket data.
+- [ ] Implement ticket submission server actions and real storage uploads.
+- [ ] Enforce technician completion and RESOLVED validation on the backend.
+- [ ] Persist status changes and TicketLog audit records through server procedures.
+- [ ] Expand Vitest coverage to role guards, lifecycle transitions, and backend completion enforcement.
+- [ ] Restrict ticket status mutations by role and organization and enforce allowed status transitions server-side.
+- [ ] Block all RESOLVED updates unless proof media and resolution notes are present, regardless of mutation path.
+- [ ] Create TicketLog entries for ticket creation and every lifecycle transition consistently.
+- [ ] Add backend tests for lifecycle transitions, organization scoping, and RESOLVED validation bypass attempts.

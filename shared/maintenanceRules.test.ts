@@ -1,0 +1,19 @@
+import { describe, expect, it } from "vitest";
+import { canMarkResolved, isValidUnitAccessCode } from "./maintenanceRules";
+
+describe("maintenance business rules", () => {
+  it("accepts only exactly six numeric unit access code digits", () => {
+    expect(isValidUnitAccessCode("123456")).toBe(true);
+    expect(isValidUnitAccessCode("12345")).toBe(false);
+    expect(isValidUnitAccessCode("1234567")).toBe(false);
+    expect(isValidUnitAccessCode("12A456")).toBe(false);
+  });
+
+  it("requires proof photo and resolution notes before resolving", () => {
+    expect(canMarkResolved({})).toBe(false);
+    expect(canMarkResolved({ proofPhotoUrl: "proof.jpg" })).toBe(false);
+    expect(canMarkResolved({ resolutionNotes: "Replaced filter" })).toBe(false);
+    expect(canMarkResolved({ proofPhotoUrl: "proof.jpg", resolutionNotes: "Replaced filter" })).toBe(true);
+    expect(canMarkResolved({ proofPhotoUrl: "  ", resolutionNotes: "Replaced filter" })).toBe(false);
+  });
+});
