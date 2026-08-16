@@ -5,8 +5,9 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { getDb } from "./db";
-import { ticketLogs, tickets } from "../drizzle/schema";
+import { ticketLogs, ticketMedia, tickets, units, users } from "../drizzle/schema";
 import { sendTicketEmail } from "./notifications";
+import { storagePut } from "./storage";
 
 const category = z.enum(["PLUMBING", "ELECTRICAL", "HVAC", "APPLIANCE", "OTHER"]);
 const priority = z.enum(["LOW", "MEDIUM", "HIGH", "EMERGENCY"]);
@@ -30,6 +31,26 @@ export const appRouter = router({
       return { success: true } as const;
     }),
   }),
+  onboarding: router({
+    joinUnit: protectedProcedure.input(z.object({ accessCode: z.string().regex(/^\\d{6}$/, "Access code must be exactly 6 digits") })).mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database unavailable");
+      const match = await db.select().from(units).where(eq(units.accessCode, input.accessCode)).limit(1);
+      const unit = match[0];
+      if (!unit) throw new Error("Unit access code not found");
+      await db.update(users).set({ unitId: unit.id }).where(eq(users.id, ctx.user.id));
+      return { success: true, unitId: unit.id };
+    }),
+  }),
+  manager: router({
+    generateUnitCode: managerOnly.input(z.object({ unitId: z.number().int().positive() })).mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database unavailable");
+      const accessCode = String(Math.floor(100000 + Math.random() * 900000));
+      await db.update(units).set({ accessCode }).where(eq(units.id, input.unitId));
+      return { success: true, accessCode };
+    }),
+  }),
   tickets: router({
     list: protectedProcedure.input(z.object({ status: status.optional(), priority: priority.optional(), category: category.optional() }).optional()).query(async ({ ctx, input }) => {
       const db = await getDb();
@@ -48,6 +69,18 @@ export const appRouter = router({
       await db.insert(ticketLogs).values({ ticketId, actorId: ctx.user.id, action: "CREATED", message: "Ticket created" });
       await sendTicketEmail({ event: "TICKET_CREATED", recipientEmail: ctx.user.email, subject: `New maintenance ticket ${ticketId}`, text: `${input.title}\n\n${input.description}` });
       return { success: true, ticketId };
+    }),
+    attachMedia: protectedProcedure.input(z.object({ ticketId: z.number().int().positive(), fileName: z.string().min(1).max(255), contentType: z.enum(["image/jpeg", "image/png", "image/webp", "video/mp4", "video/quicktime"]), base64Data: z.string().min(20) })).mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db || !ctx.user.organizationId) throw new Error("Database or organization unavailable");
+      const current = await db.select().from(tickets).where(and(eq(tickets.id, input.ticketId), eq(tickets.organizationId, ctx.user.organizationId))).limit(1);
+      if (!current[0]) throw new Error("Ticket not found in your organization");
+      const raw = input.base64Data.replace(/^data:[^;]+;base64,/, "");
+      const data = Buffer.from(raw, "base64");
+      const uploaded = await storagePut(`tickets/${input.ticketId}/${input.fileName}`, data, input.contentType);
+      const mediaType = input.contentType.startsWith("video/") ? "VIDEO" : "IMAGE";
+      await db.insert(ticketMedia).values({ ticketId: input.ticketId, uploadedById: ctx.user.id, mediaUrl: uploaded.url, mediaType });
+      return { success: true, url: uploaded.url, key: uploaded.key };
     }),
     assign: managerOnly.input(z.object({ ticketId: z.number().int().positive(), technicianId: z.number().int().positive(), priority: priority.optional() })).mutation(async ({ ctx, input }) => {
       const db = await getDb();
