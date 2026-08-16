@@ -40,3 +40,7 @@
 - [ ] Block all RESOLVED updates unless proof media and resolution notes are present, regardless of mutation path.
 - [ ] Create TicketLog entries for ticket creation and every lifecycle transition consistently.
 - [ ] Add backend tests for lifecycle transitions, organization scoping, and RESOLVED validation bypass attempts.
+- [x] Configure email-only notifications as the default free-path delivery channel.
+- [x] Keep Twilio SMS/WhatsApp support optional behind environment variables and a feature toggle.
+- [x] Add notification environment-variable documentation and safe fallback behavior when credentials are absent.
+- [x] Add notification setup documentation listing RESEND_API_KEY, NOTIFICATION_FROM_EMAIL, optional TWILIO_ENABLED, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_FROM, including fallback behavior when credentials are missing.
