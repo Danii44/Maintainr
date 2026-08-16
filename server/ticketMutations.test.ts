@@ -5,6 +5,7 @@ import type { TrpcContext } from "./_core/context";
 const { getDbMock } = vi.hoisted(() => ({ getDbMock: vi.fn() }));
 vi.mock("./db", () => ({ getDb: getDbMock }));
 vi.mock("./notifications", () => ({ sendTicketEmail: vi.fn() }));
+vi.mock("./storage", () => ({ storagePut: vi.fn(async (key: string) => ({ key, url: `https://cdn.example/${key}` })) }));
 
 function createContext(role: "PROPERTY_MANAGER" | "TECHNICIAN" | "TENANT"): TrpcContext {
   return {
@@ -55,6 +56,16 @@ describe("ticket mutation procedures", () => {
     await expect(caller.tickets.create({ unitId: 9, title: "Broken kitchen tap", description: "The kitchen tap leaks whenever it is opened.", category: "PLUMBING", priority: "MEDIUM", preferredAccessTime: "09:00-11:00" })).resolves.toEqual({ success: true, ticketId: 501 });
     expect(db.inserts).toHaveLength(2);
     expect((db.inserts[1] as { value: { action?: string } }).value.action).toBe("CREATED");
+  });
+
+  it("creates a tenant ticket and attaches multiple files through the real router procedures", async () => {
+    const db = createDb([{ id: 501, organizationId: 1, status: "OPEN", submittedById: 20 }]);
+    getDbMock.mockResolvedValue(db);
+    const caller = appRouter.createCaller(createContext("TENANT"));
+    const created = await caller.tickets.create({ unitId: 9, title: "Multiple attachment test", description: "The issue includes photos from two different angles.", category: "OTHER", priority: "MEDIUM" });
+    await expect(caller.tickets.attachMedia({ ticketId: created.ticketId, fileName: "front.jpg", contentType: "image/jpeg", base64Data: "data:image/jpeg;base64,ZmFrZS1pbWFnZS1ieXRlcw==" })).resolves.toMatchObject({ success: true });
+    await expect(caller.tickets.attachMedia({ ticketId: created.ticketId, fileName: "side.jpg", contentType: "image/jpeg", base64Data: "data:image/jpeg;base64,ZmFrZS1pbWFnZS1ieXRlcw==" })).resolves.toMatchObject({ success: true });
+    expect(db.inserts).toHaveLength(4);
   });
 
   it("binds a first-time tenant to a unit through the protected join procedure", async () => {

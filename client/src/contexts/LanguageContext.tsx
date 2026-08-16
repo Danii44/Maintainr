@@ -15,6 +15,8 @@ const LanguageContext = createContext<LanguageContextValue | null>(null);
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => {
     if (typeof window === "undefined") return "en";
+    const requested = new URLSearchParams(window.location.search).get("lang");
+    if (requested === "ar") return "ar";
     return window.localStorage.getItem("maintainr-language") === "ar" ? "ar" : "en";
   });
 
