@@ -15,6 +15,20 @@
       "when": 1786878146659,
       "tag": "0001_ambiguous_shard",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1786886011864,
+      "tag": "0002_warm_chronomancer",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1786886502266,
+      "tag": "0003_ancient_supernaut",
+      "breakpoints": true
     }
   ]
 }

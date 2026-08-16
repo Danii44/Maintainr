@@ -110,3 +110,38 @@
 - [x] Add a focused technician portal verification proving selected job details, proof upload ticketId, and completion ticketId remain aligned.
 - [x] Add a focused tenant workflow verification for ticket creation followed by multi-file attachment uploads.
 - [x] Add a focused tenant failure-handling verification for retained failed files, retry action, and per-file status transitions.
+
+- [x] Add a dashboard-managed maintenance reminder model with organization, property/unit, assignee, cadence, next-run, active state, and audit metadata.
+- [x] Add role-scoped reminder CRUD for property managers and read/acknowledge views for tenants, technicians, and flat owners.
+- [x] Add recurring reminder execution through the site’s scheduled callback with idempotent notification delivery and task UID persistence.
+- [x] Add bilingual reminder creation, list, empty, validation, and notification copy with Arabic RTL support.
+- [x] Preserve role-based post-login routing and separate portal URLs for PROPERTY_MANAGER, TENANT, TECHNICIAN, and FLAT_OWNER.
+- [x] Add reminder permission, recurrence, execution, notification, and dashboard integration tests.
+
+- [x] Add developer settings for project name, logo URL, primary/accent theme colors, and bilingual labels.
+- [x] Add protected developer controls for email and SMS notification enablement with safe disabled defaults.
+- [x] Add environment/setup documentation and secret placeholders for notification provider keys without exposing credential values in the UI.
+- [x] Add organization-owner authorization and tests for developer settings reads and updates.
+
+- [x] Add tenant, technician, and flat-owner reminder views with an acknowledge action and role-scoped tests.
+- [x] Add reminder execution deduplication before notification delivery so retries cannot resend the same occurrence.
+- [x] Localize reminder notification subjects, bodies, and validation/error messages in Arabic and English.
+- [x] Add configurable bilingual branding labels to developer settings or explicitly narrow branding scope to project name/logo/colors.
+- [x] Change email and SMS channel defaults to disabled until explicitly enabled and configured, with default-state tests.
+
+- [x] Add router and scheduler tests for reminder CRUD, execution deduplication, channel toggles, and dashboard-facing list behavior.
+- [x] Restrict developer settings reads to property managers and add direct authorization tests for settings get/update.
+- [x] Localize reminder router validation and authorization errors with bilingual error contracts.
+- [x] Add tests proving reminder email and SMS channels remain disabled until explicitly enabled and configured.
+
+- [x] Add direct tRPC tests for reminders.list/create/update/remove/acknowledge, including role-scoped dashboard list results.
+- [x] Add direct authorization coverage proving non-managers cannot call developer settings.update.
+- [x] Localize reminder input validation and manager-only forbidden errors with bilingual contracts and tests.
+
+- [x] Add direct reminder-list tests for TENANT, TECHNICIAN, and FLAT_OWNER organization/unit/assignment scoping.
+- [x] Add direct bilingual validation tests for reminder title, description, and due date failures.
+- [x] Add direct bilingual forbidden-response tests for manager-only reminder and settings procedures.
+- [x] Audit reminder update, remove, and acknowledge validation/error paths for remaining default English-only messages.
+
+- [x] Localize reminders.update, reminders.remove, and reminders.acknowledge invalid-ID validation errors with bilingual contracts.
+- [x] Add direct tests for invalid reminder update/remove/acknowledge inputs and verify no default English-only reminder error remains.

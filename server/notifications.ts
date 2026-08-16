@@ -1,4 +1,4 @@
-type TicketNotificationEvent = "TICKET_CREATED" | "TICKET_ASSIGNED" | "STATUS_CHANGED" | "TICKET_RESOLVED";
+type TicketNotificationEvent = "TICKET_CREATED" | "TICKET_ASSIGNED" | "STATUS_CHANGED" | "TICKET_RESOLVED" | "MAINTENANCE_REMINDER";
 
 type NotificationInput = {
   event: TicketNotificationEvent;
@@ -39,4 +39,14 @@ export async function sendTicketEmail(input: NotificationInput) {
 
 export function twilioEnabled() {
   return process.env.TWILIO_ENABLED === "true" && Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_FROM);
+}
+
+export async function sendTicketSms(input: { recipientPhone?: string | null; text: string }) {
+  if (!input.recipientPhone || !twilioEnabled()) return { delivered: false, mode: "fallback" as const, reason: "SMS is disabled or credentials/recipient are not configured" };
+  const accountSid = process.env.TWILIO_ACCOUNT_SID!;
+  const auth = Buffer.from(`${accountSid}:${process.env.TWILIO_AUTH_TOKEN!}`).toString("base64");
+  const body = new URLSearchParams({ To: input.recipientPhone, From: process.env.TWILIO_FROM!, Body: input.text });
+  const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`, { method: "POST", headers: { Authorization: `Basic ${auth}`, "Content-Type": "application/x-www-form-urlencoded" }, body });
+  if (!response.ok) return { delivered: false, mode: "fallback" as const, reason: `SMS provider returned ${response.status}` };
+  return { delivered: true, mode: "sms" as const };
 }
