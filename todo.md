@@ -14,7 +14,7 @@
 - [ ] Implement manager user management for tenant creation, unit-code generation, and technician invitations.
 - [x] Implement the Tenant active-ticket progress dashboard.
 - [x] Implement searchable Tenant maintenance history.
-- [ ] Implement Tenant ticket submission with category, description, media upload, and preferred access time.
+- [x] Implement Tenant ticket submission with category, description, media upload, and preferred access time.
 - [x] Implement the mobile-optimized Technician assigned-jobs portal sorted by urgency.
 - [x] Implement Technician job detail, status transitions, proof-photo upload, and mandatory resolution notes.
 - [ ] Prevent a ticket from reaching RESOLVED without both proof photo and resolution notes.
@@ -32,7 +32,7 @@
 - [ ] Replace hardcoded seedTickets with database-backed queries and mutations.
 - [ ] Add full ticket filtering by status, priority, and category.
 - [ ] Implement searchable tenant history with persisted ticket data.
-- [ ] Implement ticket submission server actions and real storage uploads.
+- [x] Implement ticket submission server actions and real storage uploads.
 - [x] Enforce technician completion and RESOLVED validation on the backend.
 - [x] Persist status changes and TicketLog audit records through server procedures.
 - [ ] Expand Vitest coverage to role guards, lifecycle transitions, and backend completion enforcement.
@@ -64,7 +64,7 @@
 - [ ] Audit Arabic mode across sidebars, headers, tables, cards, forms, spacing, and alignment for RTL correctness.
 - [x] Wire /join-unit UI to the backend onboarding procedure and persist unit binding before redirecting tenants.
 - [ ] Replace seedTickets across manager, tenant, technician, and owner portals with authenticated tRPC queries and mutations.
-- [ ] Connect tenant media uploads and technician proof-photo uploads to the secure storage procedure and persist TicketMedia records.
+- [x] Connect tenant media uploads and technician proof-photo uploads to the secure storage procedure and persist TicketMedia records.
 - [ ] Perform explicit Arabic-mode QA by switching to Arabic and validating RTL layouts across all portals at desktop and mobile sizes.
 - [x] Add the missing RESOLVED to CLOSED server transition and verify all required status paths.
 - [x] Create TicketLog entries for ticket creation and every lifecycle transition consistently.
@@ -80,3 +80,9 @@
 - [x] Audit the technician detail pane for remaining hardcoded job content.
 - [x] Drive technician header summary, current time metadata, and current-job context from selected live data or neutral localized labels instead of fixed job-specific copy.
 - [ ] Add focused technician selection verification for displayed job, proof upload target, and completion target alignment.
+- [x] Let tenants select media before submission and attach all selected files after the ticket is created.
+- [x] Remove the misleading single-file behavior or support all selected files with upload progress and errors.
+- [ ] Add focused tenant ticket-plus-media workflow verification.
+- [ ] Handle partial tenant media upload failures separately from successful ticket creation.
+- [ ] Add per-file tenant media upload progress, success, failure, and retry states.
+- [ ] Add focused tenant ticket-plus-multi-file attachment verification, including attachment failure handling.
