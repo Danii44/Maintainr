@@ -44,3 +44,21 @@
 - [x] Keep Twilio SMS/WhatsApp support optional behind environment variables and a feature toggle.
 - [x] Add notification environment-variable documentation and safe fallback behavior when credentials are absent.
 - [x] Add notification setup documentation listing RESEND_API_KEY, NOTIFICATION_FROM_EMAIL, optional TWILIO_ENABLED, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_FROM, including fallback behavior when credentials are missing.
+
+- [ ] Evaluate Firebase Firestore, Authentication, and Storage as an alternative to the current database/auth/storage stack.
+- [ ] Decide whether Firebase migration is recommended for this project and document tradeoffs.
+- [ ] Add a simple Arabic/English language switcher available from every portal.
+- [ ] Add RTL layout support for Arabic and LTR layout support for English.
+- [ ] Rewrite portal labels, actions, statuses, and empty states in clear bilingual language.
+- [ ] Simplify navigation so each role sees only the most important actions.
+- [ ] Test Arabic text rendering, RTL alignment, responsive behavior, and language persistence.
+
+- [x] Create FIREBASE_SETUP.md with console steps, required client environment variables, Firestore rules guidance, and Storage billing notes.
+- [x] Create a safe Firebase environment template with empty placeholder values and no credentials.
+- [x] Keep the current backend functional when Firebase variables are empty.
+- [x] Implement Arabic/English translations and language persistence.
+- [x] Implement RTL/LTR direction switching across the application.
+- [ ] Simplify role navigation and clarify primary actions for all portals.
+- [ ] Translate all remaining portal copy in Home, Auth, Join Unit, Manager, Tenant, Technician, and Flat Owner screens.
+- [ ] Localize status, priority, category labels, form placeholders, toast messages, and help text.
+- [ ] Audit Arabic mode across sidebars, headers, tables, cards, forms, spacing, and alignment for RTL correctness.

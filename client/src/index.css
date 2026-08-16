@@ -175,3 +175,14 @@
     }
   }
 }
+
+/* Bilingual layout support */
+html[dir="rtl"] body { direction: rtl; }
+html[dir="rtl"] input,
+html[dir="rtl"] textarea,
+html[dir="rtl"] select { text-align: right; }
+html[dir="rtl"] .text-left { text-align: right; }
+html[dir="rtl"] .lg\:pl-72 { padding-left: 0; padding-right: 18rem; }
+@media (max-width: 1023px) {
+  html[dir="rtl"] .lg\:pl-72 { padding-right: 0; }
+}

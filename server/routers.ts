@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, or } from "drizzle-orm";
 import { z } from "zod";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
@@ -72,6 +72,8 @@ export const appRouter = router({
       const db = await getDb();
       if (!db || !ctx.user.organizationId) return [];
       const filters = [eq(tickets.organizationId, ctx.user.organizationId)];
+      if (ctx.user.role === "TENANT") filters.push(or(eq(tickets.submittedById, ctx.user.id), eq(tickets.unitId, ctx.user.unitId ?? -1))!);
+      if (ctx.user.role === "TECHNICIAN") filters.push(eq(tickets.assignedToId, ctx.user.id));
       if (input?.status) filters.push(eq(tickets.status, input.status));
       if (input?.priority) filters.push(eq(tickets.priority, input.priority));
       if (input?.category) filters.push(eq(tickets.category, input.category));
@@ -101,6 +103,8 @@ export const appRouter = router({
     assign: managerOnly.input(z.object({ ticketId: z.number().int().positive(), technicianId: z.number().int().positive(), priority: priority.optional() })).mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) throw new Error("Database unavailable");
+      const current = await db.select().from(tickets).where(and(eq(tickets.id, input.ticketId), eq(tickets.organizationId, ctx.user.organizationId!))).limit(1);
+      if (!current[0]) throw new Error("Ticket not found in your organization");
       await db.update(tickets).set({ assignedToId: input.technicianId, status: "ASSIGNED", priority: input.priority }).where(eq(tickets.id, input.ticketId));
       await db.insert(ticketLogs).values({ ticketId: input.ticketId, actorId: ctx.user.id, action: "ASSIGNED", message: `Assigned technician ${input.technicianId}` });
       await sendTicketEmail({ event: "TICKET_ASSIGNED", recipientEmail: ctx.user.email, subject: `Ticket ${input.ticketId} assigned`, text: `A technician was assigned to ticket ${input.ticketId}.` });
