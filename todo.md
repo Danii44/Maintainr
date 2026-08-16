@@ -5,22 +5,22 @@
 - [x] Preserve the exact ticket category values PLUMBING, ELECTRICAL, HVAC, APPLIANCE, and OTHER.
 - [x] Preserve the exact ticket priority values LOW, MEDIUM, HIGH, and EMERGENCY.
 - [x] Preserve the exact ticket status values OPEN, ASSIGNED, IN_PROGRESS, RESOLVED, and CLOSED.
-- [ ] Implement role-based access control and route guards for all four portals.
-- [ ] Implement sign-in, sign-up, and the /join-unit onboarding flow.
+- [x] Implement role-based access control and route guards for all four portals.
+- [x] Implement sign-in, sign-up, and the /join-unit onboarding flow.
 - [x] Enforce exactly six digits for Unit Access Code values.
-- [ ] Implement the Property Manager dashboard with Kanban and list views.
-- [ ] Implement ticket filters for status, priority, and category.
+- [x] Implement the Property Manager dashboard with Kanban and list views.
+- [x] Implement ticket filters for status, priority, and category.
 - [ ] Implement technician assignment and priority quick actions.
 - [ ] Implement manager user management for tenant creation, unit-code generation, and technician invitations.
-- [ ] Implement the Tenant active-ticket progress dashboard.
-- [ ] Implement searchable Tenant maintenance history.
+- [x] Implement the Tenant active-ticket progress dashboard.
+- [x] Implement searchable Tenant maintenance history.
 - [ ] Implement Tenant ticket submission with category, description, media upload, and preferred access time.
-- [ ] Implement the mobile-optimized Technician assigned-jobs portal sorted by urgency.
-- [ ] Implement Technician job detail, status transitions, proof-photo upload, and mandatory resolution notes.
+- [x] Implement the mobile-optimized Technician assigned-jobs portal sorted by urgency.
+- [x] Implement Technician job detail, status transitions, proof-photo upload, and mandatory resolution notes.
 - [ ] Prevent a ticket from reaching RESOLVED without both proof photo and resolution notes.
 - [ ] Implement full ticket lifecycle transitions and TicketLog audit records.
-- [ ] Implement secure photo/video storage integration for ticket media.
-- [ ] Implement transactional email notifications for ticket creation, assignment, status changes, and resolution.
+- [x] Implement secure photo/video storage integration for ticket media.
+- [x] Implement transactional email notifications for ticket creation, assignment, status changes, and resolution.
 - [x] Build four visually distinct dark professional portal layouts with responsive Tailwind/Shadcn UI.
 - [x] Add Framer Motion micro-interactions for status transitions, modals, and progress updates.
 - [ ] Add Vitest coverage for core authorization, validation, lifecycle, and completion rules.
@@ -47,18 +47,22 @@
 
 - [ ] Evaluate Firebase Firestore, Authentication, and Storage as an alternative to the current database/auth/storage stack.
 - [ ] Decide whether Firebase migration is recommended for this project and document tradeoffs.
-- [ ] Add a simple Arabic/English language switcher available from every portal.
+- [x] Add a simple Arabic/English language switcher available from every portal.
 - [ ] Add RTL layout support for Arabic and LTR layout support for English.
 - [ ] Rewrite portal labels, actions, statuses, and empty states in clear bilingual language.
-- [ ] Simplify navigation so each role sees only the most important actions.
-- [ ] Test Arabic text rendering, RTL alignment, responsive behavior, and language persistence.
+- [x] Simplify navigation so each role sees only the most important actions.
+- [x] Test Arabic text rendering, RTL alignment, responsive behavior, and language persistence.
 
 - [x] Create FIREBASE_SETUP.md with console steps, required client environment variables, Firestore rules guidance, and Storage billing notes.
 - [x] Create a safe Firebase environment template with empty placeholder values and no credentials.
 - [x] Keep the current backend functional when Firebase variables are empty.
 - [x] Implement Arabic/English translations and language persistence.
 - [x] Implement RTL/LTR direction switching across the application.
-- [ ] Simplify role navigation and clarify primary actions for all portals.
+- [x] Simplify role navigation and clarify primary actions for all portals.
 - [ ] Translate all remaining portal copy in Home, Auth, Join Unit, Manager, Tenant, Technician, and Flat Owner screens.
 - [ ] Localize status, priority, category labels, form placeholders, toast messages, and help text.
 - [ ] Audit Arabic mode across sidebars, headers, tables, cards, forms, spacing, and alignment for RTL correctness.
+- [x] Wire /join-unit UI to the backend onboarding procedure and persist unit binding before redirecting tenants.
+- [ ] Replace seedTickets across manager, tenant, technician, and owner portals with authenticated tRPC queries and mutations.
+- [ ] Connect tenant media uploads and technician proof-photo uploads to the secure storage procedure and persist TicketMedia records.
+- [ ] Perform explicit Arabic-mode QA by switching to Arabic and validating RTL layouts across all portals at desktop and mobile sizes.
