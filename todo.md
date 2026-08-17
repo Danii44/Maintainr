@@ -236,12 +236,16 @@
 - [ ] Verify the users table columns and exact PostgreSQL error after credential rotation.
 - [ ] Re-test deployed sign-up/sign-in and database health after updating Netlify variables.
 
-- [ ] Surface a safe, useful PostgreSQL error detail for the deployed sign-up/sign-in failure without exposing credentials.
+- [x] Surface a safe, useful PostgreSQL users-schema diagnostic for the deployed sign-up/sign-in failure without exposing credentials.
 - [ ] Verify Manager-created or invited Tenant, Technician, and Flat Owner accounts use separate credentials and correct organization/role scope.
-- [ ] Validate that no user workflow requires sharing Manager credentials.
+- [x] Validate that no user workflow requires sharing Manager credentials; applicants create separate passwords through single-use invitations.
 
 - [x] Add public Tenant/Technician application intake with bilingual form and email details.
 - [x] Add Manager review and approve/reject workflow scoped to the Manager organization.
 - [x] Add secure single-use invitation activation so approved users set their own passwords.
 - [x] Send bilingual invitation emails without emailing permanent passwords or sharing Manager credentials.
 - [x] Add role-scoped account tests and update Supabase schema/deployment documentation.
+
+- [ ] Diagnose the live Netlify database health failure reported by maintainr-demo.netlify.app.
+- [ ] Verify Supabase Transaction pooler URL, password rotation, SSL, and Netlify Functions environment scope without exposing secrets.
+- [ ] Re-test live database health and authentication after the safe deployment fix.

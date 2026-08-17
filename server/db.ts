@@ -11,7 +11,15 @@ let _pool: Pool | null = null;
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _pool = new Pool({ connectionString: process.env.DATABASE_URL });
+      const connectionString = process.env.DATABASE_URL;
+      const isSupabase = connectionString.includes("supabase.com");
+      _pool = new Pool({
+        connectionString,
+        max: Number(process.env.DATABASE_POOL_MAX ?? 3),
+        connectionTimeoutMillis: Number(process.env.DATABASE_CONNECTION_TIMEOUT_MS ?? 10_000),
+        idleTimeoutMillis: 10_000,
+        ssl: isSupabase ? { rejectUnauthorized: false } : undefined,
+      });
       _db = drizzle({ client: _pool });
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
