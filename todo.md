@@ -220,6 +220,10 @@
 - [x] Push the sanitized project to the authorized public GitHub repository.
 - [x] Verify the public repository remote and uploaded contents.
 
-- [ ] Fix Supabase import error 42702 caused by ambiguous enum helper variable `value`.
-- [ ] Validate the corrected PostgreSQL schema and update the public GitHub schema file.
-- [ ] Provide safe retry instructions for a failed or partially applied Supabase schema import.
+- [x] Fix Supabase import error 42702 caused by ambiguous enum helper variable `value`.
+- [x] Validate the corrected PostgreSQL schema and update the public GitHub schema file.
+- [x] Provide safe retry instructions for a failed or partially applied Supabase schema import.
+
+- [ ] Fix Netlify Function bundling failure from Vite/Tailwind native build dependencies and missing Babel preset resolution.
+- [ ] Validate a successful Netlify build with the current environment-variable configuration.
+- [ ] Push the Netlify build fix and document the redeploy step.
