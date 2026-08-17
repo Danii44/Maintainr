@@ -255,3 +255,7 @@
 - [x] Keep one shared sign-in experience for Tenant and Technician accounts with role-based post-login routing.
 - [x] Provide a distinct protected Real Estate Manager administration screen for users, approvals, assignments, password-reset actions, settings, and history.
 - [x] Validate the revised public and role-aware navigation on desktop and mobile in both languages.
+
+- [ ] Diagnose why maintainr-demo.netlify.app still serves the pre-redesign home page.
+- [ ] Verify Netlify is connected to Danii44/Maintainr `main` and deploying the latest public commit.
+- [ ] Trigger or document the correct Netlify redeploy and verify the updated live home page.
