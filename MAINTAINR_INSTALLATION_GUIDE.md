@@ -4,7 +4,7 @@
 **Audience:** Maintainr project owner, developer, or deployment administrator  
 **Purpose:** Configure, test, and publish Maintainr as a professional multi-tenant property-maintenance SaaS.
 
-> **PostgreSQL-first target:** This release uses the standalone PostgreSQL schema in `POSTGRESQL_SCHEMA.sql`. The current preview still contains Manus-specific authentication, storage, and scheduled-callback adapters; those adapters must be replaced with your selected independent providers before distributing the application outside the project platform.
+> **PostgreSQL-first private target:** This release uses the standalone PostgreSQL schema in `POSTGRESQL_SCHEMA.sql` and self-hosted email/password authentication. Storage and scheduled-callback adapters remain deployment-specific and must be configured for the independent host you choose. Purchase-code activation is not required for your private installation.
 
 ## 1. What you must create
 
@@ -12,11 +12,10 @@ For the first professional release, create the accounts in the following table. 
 
 | Account or service | Required? | What it provides | Where to create it |
 |---|---:|---|---|
-| Maintainr/Manus project | Yes | Hosting, database, OAuth, storage, project settings, publishing | Use the project Management UI |
+| PostgreSQL provider | Yes | Database for organizations, users, sessions, tickets, reminders, and audit logs | Any PostgreSQL provider or your own server |
 | Domain registrar/DNS provider | Recommended | Professional website address such as `app.example.com` | Any domain provider you trust |
 | Resend | Recommended for email | Ticket, assignment, status, and maintenance-reminder email | [resend.com/signup](https://resend.com/signup) |
 | Twilio | Optional | SMS reminders and SMS ticket notifications | [twilio.com/try-twilio](https://www.twilio.com/try-twilio) |
-| Independent authentication provider | Required for external distribution | Your own login system and role sessions; choose the provider before the auth migration | Provider of your choice |
 
 **Do not upload the PostgreSQL SQL file into Firebase.** Firebase is not a PostgreSQL database. Import `POSTGRESQL_SCHEMA.sql` into a PostgreSQL service such as your own VPS, managed PostgreSQL provider, or cloud database. The application must use the matching `DATABASE_URL`.
 
@@ -86,7 +85,7 @@ If your provider gives separate host, port, database, user, and password fields,
 postgresql://DB_USER:DB_PASSWORD@DB_HOST:5432/DB_NAME?sslmode=require
 ```
 
-After the import, verify that these tables exist: `organizations`, `properties`, `units`, `users`, `tickets`, `ticketMedia`, `ticketLogs`, `maintenanceReminders`, `reminderRuns`, `reminderAcknowledgements`, and `developerSettings`. The SQL file is designed to be safely rerun for an empty or partially initialized database.
+After the import, verify that these tables exist: `organizations`, `properties`, `units`, `users`, `sessions`, `passwordResetTokens`, `tickets`, `ticketMedia`, `ticketLogs`, `maintenanceReminders`, `reminderRuns`, `reminderAcknowledgements`, and `developerSettings`. The SQL file is designed to be safely rerun for an empty or partially initialized database.
 
 After importing the schema, set `DATABASE_URL` to a PostgreSQL connection string. Use SSL in production, create a least-privilege application database user, and configure automated backups before importing real organizations or tickets. Do not run the schema against the current managed project database because that database is not the user’s independent PostgreSQL target.
 
@@ -95,8 +94,8 @@ The PostgreSQL schema is server-side configuration. Never place `DATABASE_URL` i
 | Environment variable | Purpose |
 |---|---|
 | `DATABASE_URL` | PostgreSQL connection string for the server |
-| `AUTH_SECRET` | Secret used by the independent authentication adapter |
-| `AUTH_BASE_URL` | Public application URL used by the independent authentication adapter |
+| `BOOTSTRAP_MANAGER_EMAIL` | Email that receives the first `PROPERTY_MANAGER` role during signup |
+| `AUTH_BASE_URL` | Public HTTPS URL used in password-reset links |
 
 Do not commit database passwords, authentication secrets, provider keys, or service-account files. Keep PostgreSQL as the only source of truth for organizations, users, tickets, media metadata, reminders, and audit logs.
 
@@ -106,7 +105,7 @@ Use the project’s secure environment/secrets management interface for real cre
 
 | Value type | Correct location |
 |---|---|
-| Resend API key, Twilio Auth Token, database credentials, server OAuth secrets | Managed project secrets |
+| Resend API key, Twilio Auth Token, database credentials, bootstrap email, and reset configuration | Managed project secrets |
 | Project name, Arabic project name, logo URL, primary color, accent color | Maintainr Developer Settings |
 | Email/SMS enabled or disabled | Maintainr Developer Settings, with safe disabled defaults |
 | PostgreSQL connection and independent auth secrets | Server-side deployment secret manager only |
@@ -116,7 +115,7 @@ If you are asked to enter a secret in chat, do not paste it into the conversatio
 
 ## 7. Test the complete product before publishing
 
-First, test sign-in and sign-up with separate accounts. Confirm that a new user can complete `/join-unit` with a valid six-digit code and that an invalid code is rejected. Confirm that each exact role reaches only its own portal.
+First, set `BOOTSTRAP_MANAGER_EMAIL` and test local email/password sign-in and sign-up with separate accounts. Test `/forgot-password` and `/reset-password` with Resend configured, then verify logout revokes the active session. Confirm that a new user can complete `/join-unit` with a valid six-digit code and that an invalid code is rejected. Confirm that each exact role reaches only its own portal.
 
 Next, use the manager portal to create a ticket, assign a technician, change priority, and review the audit history. Use the tenant portal to create a request with multiple attachments. Use the technician portal to upload proof media and resolution notes; verify that resolution cannot be submitted without both. Use the owner portal to review the scoped reminder and ticket information.
 
@@ -124,11 +123,11 @@ Create one one-time reminder and one recurring reminder. Confirm that the manage
 
 Switch to Arabic and verify the public pages, authentication, onboarding, manager dashboard, reminder form, reminder inbox, ticket forms, and mobile layouts. Verify that the URL query preview `?lang=ar` does not change the user’s persisted language preference.
 
-## 8. Publish and distribute
+## 8. Deploy and operate independently
 
-Before publishing, confirm that all production secrets are configured, the notification sender domain is verified, the domain is connected, the database schema migration has been applied, and the latest tests pass. Create a checkpoint in the project Management UI. Then use the project’s **Publish** button to make the application available. Publishing is a user-controlled action; it should be performed only after the release checklist is complete. Manus documents publishing in its [official Publishing guide][8] and custom-domain connection in its [official Custom Domains guide][9].
+Before deployment, confirm that all production secrets are configured, the notification sender domain is verified, the PostgreSQL schema has been imported, the latest tests pass, and a backup has been taken. For Vercel or Netlify, deploy the frontend and adapt the Node/tRPC server to the provider’s server-function model; recurring reminders need a separate cron or worker service. For cPanel, use the Node.js Application Manager or Passenger, configure the server environment values, enable SSL, and configure a reliable cron job. The application must not depend on a Manus login redirect for private operation.
 
-After publishing, open the production URL in a private browser window and test sign-in, sign-up, `/join-unit`, each portal URL, media upload, email, reminders, and the language switch. Review production logs after the first scheduled reminder callback. Keep database backups enabled and document who can rotate secrets, recover the organization owner account, and disable notification channels during an incident.
+After deployment, open the production URL in a private browser window and test sign-in, sign-up, password reset, logout, `/join-unit`, each portal URL, media upload, email, reminders, and the language switch. Review production logs after the first scheduled reminder callback. Keep database backups enabled and document who can rotate secrets, recover the organization owner account, and disable notification channels during an incident.
 
 ## References
 

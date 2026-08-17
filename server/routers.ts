@@ -3,6 +3,7 @@ import { z } from "zod";
 import { parse as parseCookie } from "cookie";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
+import { authenticate, register, requestPasswordReset, resetPassword, revokeSession, getSessionToken, sessionCookieOptions, ONE_YEAR_MS } from "./auth";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { getDb } from "./db";
@@ -32,7 +33,20 @@ export const appRouter = router({
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
-    logout: publicProcedure.mutation(({ ctx }) => {
+    signIn: publicProcedure.input(z.object({ email: z.string().email(), password: z.string().min(8) })).mutation(async ({ ctx, input }) => {
+      const result = await authenticate(input.email, input.password);
+      ctx.res.cookie(COOKIE_NAME, result.token, { ...sessionCookieOptions(ctx.req), maxAge: Math.floor(ONE_YEAR_MS / 1000) });
+      return result.user;
+    }),
+    signUp: publicProcedure.input(z.object({ name: z.string().min(2), email: z.string().email(), password: z.string().min(8) })).mutation(async ({ ctx, input }) => {
+      const result = await register(input.email, input.password, input.name);
+      ctx.res.cookie(COOKIE_NAME, result.token, { ...sessionCookieOptions(ctx.req), maxAge: Math.floor(ONE_YEAR_MS / 1000) });
+      return result.user;
+    }),
+    requestPasswordReset: publicProcedure.input(z.object({ email: z.string().email() })).mutation(({ input }) => requestPasswordReset(input.email)),
+    resetPassword: publicProcedure.input(z.object({ token: z.string().min(20), password: z.string().min(8) })).mutation(({ input }) => resetPassword(input.token, input.password)),
+    logout: publicProcedure.mutation(async ({ ctx }) => {
+      await revokeSession(await getSessionToken(ctx.req));
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return { success: true } as const;

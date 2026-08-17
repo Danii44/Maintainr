@@ -166,7 +166,7 @@
 - [ ] Capture authenticated Arabic/English portal evidence after real role sessions are available.
 
 - [ ] Choose and document an independent deployment architecture that does not depend on Manus OAuth or Manus hosting.
-- [ ] Replace Manus OAuth with the selected independent authentication provider and preserve exact role routing.
+- [x] Replace Manus OAuth with self-hosted PostgreSQL email/password authentication and preserve exact role routing.
 - [ ] Replace or independently host the database, media storage, scheduled reminders, and notification integrations.
 - [x] Add independent environment templates, migration instructions, domain setup, backups, and production deployment configuration.
 - [ ] Run independent-hosting release verification without a Manus login redirect.
@@ -189,3 +189,13 @@
 - [x] Keep purchase-code activation optional and deferred for the private owner-controlled release.
 - [x] Prepare owner-only deployment configuration and handoff without requiring a customer license code.
 - [ ] Revisit Envato-style licensing only when the product is ready for distribution to external customers.
+
+- [x] Replace Manus OAuth with self-hosted PostgreSQL email/password authentication.
+- [x] Add secure password hashing, server-side sessions, logout, and role-preserving redirects for all four portals.
+- [x] Add password reset and rate-limiting boundaries with safe environment documentation.
+- [x] Add independent-auth schema migration and regression tests without exposing credentials.
+- [x] Verify that the independent login flow no longer redirects to Manus OAuth.
+
+- [x] Wire the AppShell sign-out control to use the local logout mutation and verify session revocation plus cookie clearing.
+- [x] Add direct auth regression tests for sign-in, sign-up, logout, reset flows, and context-backed auth.me resolution.
+- [x] Update the installation, auth-flow, production-release, and environment-template documents to remove stale Manus OAuth guidance and describe self-hosted authentication.

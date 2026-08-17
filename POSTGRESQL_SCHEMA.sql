@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS "users" (
   "unitId" integer REFERENCES "units"("id") ON DELETE SET NULL,
   "name" varchar(255),
   "email" varchar(320),
+  "passwordHash" text,
   "phone" varchar(32),
   "role" "role" NOT NULL DEFAULT 'TENANT',
   "loginMethod" varchar(64),
@@ -80,6 +81,24 @@ BEGIN
   END IF;
 END;
 $$;
+
+CREATE TABLE IF NOT EXISTS "sessions" (
+  "id" serial PRIMARY KEY,
+  "userId" integer NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
+  "tokenHash" varchar(64) NOT NULL UNIQUE,
+  "expiresAt" timestamptz NOT NULL,
+  "revokedAt" timestamptz,
+  "createdAt" timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS "passwordResetTokens" (
+  "id" serial PRIMARY KEY,
+  "userId" integer NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
+  "tokenHash" varchar(64) NOT NULL UNIQUE,
+  "expiresAt" timestamptz NOT NULL,
+  "usedAt" timestamptz,
+  "createdAt" timestamptz NOT NULL DEFAULT now()
+);
 
 CREATE TABLE IF NOT EXISTS "tickets" (
   "id" serial PRIMARY KEY,
@@ -171,6 +190,10 @@ CREATE TABLE IF NOT EXISTS "developerSettings" (
 CREATE INDEX IF NOT EXISTS "properties_org_idx" ON "properties" ("organizationId");
 CREATE INDEX IF NOT EXISTS "users_org_role_idx" ON "users" ("organizationId", "role");
 CREATE INDEX IF NOT EXISTS "users_unit_idx" ON "users" ("unitId");
+CREATE INDEX IF NOT EXISTS "sessions_user_idx" ON "sessions" ("userId");
+CREATE INDEX IF NOT EXISTS "sessions_expiry_idx" ON "sessions" ("expiresAt");
+CREATE INDEX IF NOT EXISTS "password_reset_user_idx" ON "passwordResetTokens" ("userId");
+CREATE INDEX IF NOT EXISTS "password_reset_expiry_idx" ON "passwordResetTokens" ("expiresAt");
 CREATE INDEX IF NOT EXISTS "tickets_org_status_idx" ON "tickets" ("organizationId", "status");
 CREATE INDEX IF NOT EXISTS "tickets_assignee_idx" ON "tickets" ("assignedToId");
 CREATE INDEX IF NOT EXISTS "tickets_priority_idx" ON "tickets" ("priority");

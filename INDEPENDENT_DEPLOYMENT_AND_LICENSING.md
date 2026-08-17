@@ -4,7 +4,7 @@
 
 Maintainr can be deployed to **Vercel, Netlify, or cPanel**, but the backend must run somewhere that supports Node.js server execution, PostgreSQL connectivity, file storage, and scheduled work. A static-only deployment is not sufficient for the tRPC API, uploads, ticket lifecycle mutations, or recurring reminders.
 
-The safest independent release architecture is a Node.js-capable host plus a managed PostgreSQL database, S3-compatible object storage, an independent authentication provider, Resend for email, optional Twilio for SMS, and a scheduled worker or cron endpoint. The current preview still uses the project platform’s authentication and some platform adapters; those must be replaced before external distribution.
+The safest independent release architecture is a Node.js-capable host plus a managed PostgreSQL database, S3-compatible object storage, self-hosted PostgreSQL email/password authentication, Resend for email, optional Twilio for SMS, and a scheduled worker or cron endpoint. The private release now uses the local authentication boundary; storage and scheduled-worker adapters remain separate deployment decisions.
 
 ## Platform comparison
 
@@ -38,7 +38,7 @@ For a professional database account, use a dedicated application database user w
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f POSTGRESQL_SCHEMA.sql
 ```
 
-4. Verify that the eleven Maintainr tables exist: `organizations`, `properties`, `units`, `users`, `tickets`, `ticketMedia`, `ticketLogs`, `maintenanceReminders`, `reminderRuns`, `reminderAcknowledgements`, and `developerSettings`.
+4. Verify that the thirteen Maintainr tables exist: `organizations`, `properties`, `units`, `users`, `sessions`, `passwordResetTokens`, `tickets`, `ticketMedia`, `ticketLogs`, `maintenanceReminders`, `reminderRuns`, `reminderAcknowledgements`, and `developerSettings`.
 5. Configure the same `DATABASE_URL` in the server environment of the deployed application.
 
 The project exposes two diagnostics. `GET /api/health` confirms that the server process is responding. `GET /api/health/database` checks whether the server can connect to PostgreSQL and reach the `organizations` table. It returns status, schema reachability, latency, and timestamp, but never returns the connection string, password, SQL error details, or provider credentials.
@@ -48,8 +48,8 @@ The project exposes two diagnostics. `GET /api/health` confirms that the server 
 | Variable | Purpose | Client-visible? |
 |---|---|---:|
 | `DATABASE_URL` | PostgreSQL connection string | No |
-| `AUTH_SECRET` | Independent session signing secret | No |
-| `AUTH_BASE_URL` | Public URL for the independent authentication adapter | No |
+| `AUTH_BASE_URL` | Public URL used in password-reset links | No |
+| `BOOTSTRAP_MANAGER_EMAIL` | Email allowed to create the first PROPERTY_MANAGER account during private setup | No |
 | `RESEND_API_KEY` | Email delivery | No |
 | `NOTIFICATION_FROM_EMAIL` | Verified email sender | No |
 | `TWILIO_ACCOUNT_SID` | Optional SMS account | No |
@@ -74,9 +74,13 @@ The recommended model is a private license service. Each customer receives a lic
 
 Do not implement license validation only in React. Do not place a master license secret in the frontend. Do not rely on a client-side domain check as the security boundary. If you do not operate a private license service, use a simpler honest model: sell a license, provide updates/support only to licensed customers, and protect secrets and server features through the deployment environment.
 
-## Independent authentication boundary
+## Self-hosted authentication boundary
 
-The current preview redirects to the installed Manus OAuth adapter. Before distributing outside the project platform, replace that adapter with your selected provider or a self-hosted email/password session system. Preserve the exact roles `PROPERTY_MANAGER`, `TENANT`, `TECHNICIAN`, and `FLAT_OWNER`; preserve organization and unit scoping; and keep password hashing, reset tokens, sessions, and rate limiting on the server.
+Maintainr’s private release uses email/password authentication backed by PostgreSQL. Passwords are hashed with Node’s built-in scrypt implementation; raw passwords and raw session tokens are never stored. Sessions use random bearer tokens whose SHA-256 hashes are stored in the `sessions` table, with expiry and server-side revocation. Sign-in attempts and reset requests are rate-limited in the server process, and password-reset tokens are single-use, hashed, and time-limited.
+
+Set `BOOTSTRAP_MANAGER_EMAIL` to the email you will use for the first manager account before signing up. That account receives the `PROPERTY_MANAGER` role. Additional users default to `TENANT` until a manager invites or assigns their role. Set `AUTH_BASE_URL` to the public HTTPS URL so reset links point to the correct installation. Configure Resend with `RESEND_API_KEY` and `NOTIFICATION_FROM_EMAIL` for password-reset delivery; without those values the application safely does not deliver the email.
+
+The active login and signup routes are local tRPC procedures and no longer redirect to Manus OAuth. Preserve the exact roles `PROPERTY_MANAGER`, `TENANT`, `TECHNICIAN`, and `FLAT_OWNER`; preserve organization and unit scoping; and keep password hashing, reset tokens, sessions, and rate limiting on the server.
 
 ## Release checks
 
