@@ -62,6 +62,10 @@ The project exposes two diagnostics. `GET /api/health` confirms that the server 
 
 The email and SMS channels remain disabled until their provider values are configured and explicitly enabled in Developer Settings.
 
+## Private owner-controlled mode
+
+For the current private deployment, leave `LICENSE_SERVER_URL`, `LICENSE_PRODUCT_ID`, and `LICENSE_KEY` empty or unset. The installation can be restricted through server-side secrets, private deployment access, PostgreSQL credentials, HTTPS, role-based authorization, and controlled administrator accounts. No customer purchase-code screen is required for this mode. Keep these variables reserved for the later distributable edition, when a separate license service and activation policy are ready.
+
 ## Envato-style licensing: what is possible
 
 A distributed JavaScript application cannot be made impossible to copy. Anything sent to a customer’s server or browser can eventually be inspected. Licensing can, however, control **activation, updates, support, and server-side access**.

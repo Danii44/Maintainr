@@ -185,3 +185,7 @@
 - [x] Design and document an Envato-style license activation boundary without placing a license secret in frontend code.
 - [x] Write a platform comparison and complete independent installation guide with deployment, database, auth, storage, reminders, backups, and licensing steps.
 - [x] Validate the guide and save a distributable documentation checkpoint.
+
+- [x] Keep purchase-code activation optional and deferred for the private owner-controlled release.
+- [x] Prepare owner-only deployment configuration and handoff without requiring a customer license code.
+- [ ] Revisit Envato-style licensing only when the product is ready for distribution to external customers.
