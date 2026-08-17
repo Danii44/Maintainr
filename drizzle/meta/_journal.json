@@ -1,40 +1,12 @@
 {
   "version": "7",
-  "dialect": "mysql",
+  "dialect": "postgresql",
   "entries": [
     {
       "idx": 0,
-      "version": "5",
-      "when": 1786877940434,
-      "tag": "0000_wet_vertigo",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1786878146659,
-      "tag": "0001_ambiguous_shard",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1786886011864,
-      "tag": "0002_warm_chronomancer",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1786886502266,
-      "tag": "0003_ancient_supernaut",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1786952038292,
-      "tag": "0004_flawless_sally_floyd",
+      "version": "7",
+      "when": 1786952242538,
+      "tag": "0000_nasty_stature",
       "breakpoints": true
     }
   ]

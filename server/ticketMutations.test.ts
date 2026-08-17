@@ -25,7 +25,7 @@ function createDb(rows: unknown[]) {
     select: vi.fn(() => ({ from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn(async () => [rows[0]]), orderBy: vi.fn(async () => rows) })) })) })),
     update: vi.fn(() => ({ set: vi.fn((value: unknown) => ({ where: vi.fn(async () => updates.push(value)) })) })),
     delete: vi.fn(() => ({ where: vi.fn(async () => undefined) })),
-    insert: vi.fn((table: unknown) => ({ values: vi.fn((value: unknown) => { inserts.push({ table, value }); const result = [{ insertId: 501 }] as Array<{ insertId: number }> & { onDuplicateKeyUpdate?: (input: unknown) => Promise<void> }; result.onDuplicateKeyUpdate = vi.fn(async () => undefined); return result; }) })),
+    insert: vi.fn((table: unknown) => ({ values: vi.fn((value: unknown) => { inserts.push({ table, value }); const result = { returning: vi.fn(async () => [{ id: 501 }]), onConflictDoUpdate: vi.fn(async () => undefined) }; return result; }) })),
   };
 }
 

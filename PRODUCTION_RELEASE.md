@@ -1,6 +1,6 @@
 # Maintainr Production Release Guide
 
-Maintainr is ready to be distributed through the project’s managed hosting workflow. The current architecture uses the built-in managed MySQL/TiDB database, Manus OAuth, S3-compatible media storage, the Maintainr scheduled callback for recurring reminders, Resend for email delivery, and optional Twilio SMS. Firebase is not required for release and should only be introduced later if a deliberate backend migration is approved.
+Maintainr’s PostgreSQL-first release package is prepared for independent deployment. The target architecture uses the standalone PostgreSQL schema, an independent authentication provider, S3-compatible media storage, an independently operated scheduled worker, Resend for email delivery, and optional Twilio SMS. The current preview still contains platform-specific authentication, storage, and scheduler adapters that must be replaced before external distribution.
 
 ## Release configuration
 

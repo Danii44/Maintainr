@@ -4,7 +4,7 @@
 **Audience:** Maintainr project owner, developer, or deployment administrator  
 **Purpose:** Configure, test, and publish Maintainr as a professional multi-tenant property-maintenance SaaS.
 
-> **Recommended architecture:** Keep Maintainr’s current managed MySQL/TiDB database, Manus OAuth, S3-compatible media storage, and scheduled reminder callback. Firebase is optional and is not required to publish the current product.
+> **PostgreSQL-first target:** This release uses the standalone PostgreSQL schema in `POSTGRESQL_SCHEMA.sql`. The current preview still contains Manus-specific authentication, storage, and scheduled-callback adapters; those adapters must be replaced with your selected independent providers before distributing the application outside the project platform.
 
 ## 1. What you must create
 
@@ -16,9 +16,9 @@ For the first professional release, create the accounts in the following table. 
 | Domain registrar/DNS provider | Recommended | Professional website address such as `app.example.com` | Any domain provider you trust |
 | Resend | Recommended for email | Ticket, assignment, status, and maintenance-reminder email | [resend.com/signup](https://resend.com/signup) |
 | Twilio | Optional | SMS reminders and SMS ticket notifications | [twilio.com/try-twilio](https://www.twilio.com/try-twilio) |
-| Firebase | Optional only | Alternative Authentication, Firestore, and Storage setup for a future migration | [console.firebase.google.com](https://console.firebase.google.com/) |
+| Independent authentication provider | Required for external distribution | Your own login system and role sessions; choose the provider before the auth migration | Provider of your choice |
 
-**Do not create Firebase merely to test the existing project.** Maintainr already has a working database, authentication, and storage path. Adding Firebase now would create a second backend and increase operational complexity.
+**Do not upload the PostgreSQL SQL file into Firebase.** Firebase is not a PostgreSQL database. Import `POSTGRESQL_SCHEMA.sql` into a PostgreSQL service such as your own VPS, managed PostgreSQL provider, or cloud database. The application must use the matching `DATABASE_URL`.
 
 ## 2. Configure the Maintainr project
 
@@ -70,26 +70,35 @@ Add these values as managed secrets. Leave `TWILIO_ENABLED=false` until all requ
 
 Trial accounts can have destination restrictions, verification requirements, or account limitations. Confirm the Twilio Console’s current requirements for the countries where your users live before enabling SMS.
 
-## 5. Firebase optional setup
+## 5. PostgreSQL database setup
 
-Firebase is an optional future backend path. The current Maintainr application continues to use the existing backend when Firebase is empty. If you still want to prepare Firebase, use the official Firebase Console and create a project. Firebase’s web setup requires creating a project and registering a web app; registration provides the Firebase configuration object used by the client SDK.[6]
+Create an empty PostgreSQL database under your own account. Download `POSTGRESQL_SCHEMA.sql` from this project and run it once with a PostgreSQL client such as `psql`, your provider’s SQL console, or a database administration tool. The script creates the enums, tables, indexes, foreign keys, validation checks, and updated-at triggers required by Maintainr.
 
-In the Firebase Console, create a project, register a Web App, enable only the services you intend to use, and copy the Web App configuration values. For Authentication, start with the sign-in methods you actually need. For Firestore, create the database in Native mode and write organization-aware security rules before using live data. Firebase Security Rules control access and data validation and must not be left open in production.[7]
+From a terminal, the standard import command is:
 
-Add the following client configuration values only if you are deliberately preparing the optional Firebase path. These are client configuration identifiers, not a replacement for server-side secrets.
+```bash
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f POSTGRESQL_SCHEMA.sql
+```
 
-| Environment variable | Firebase Web App field |
+If your provider gives separate host, port, database, user, and password fields, create a connection string in this form and then run the same command:
+
+```text
+postgresql://DB_USER:DB_PASSWORD@DB_HOST:5432/DB_NAME?sslmode=require
+```
+
+After the import, verify that these tables exist: `organizations`, `properties`, `units`, `users`, `tickets`, `ticketMedia`, `ticketLogs`, `maintenanceReminders`, `reminderRuns`, `reminderAcknowledgements`, and `developerSettings`. The SQL file is designed to be safely rerun for an empty or partially initialized database.
+
+After importing the schema, set `DATABASE_URL` to a PostgreSQL connection string. Use SSL in production, create a least-privilege application database user, and configure automated backups before importing real organizations or tickets. Do not run the schema against the current managed project database because that database is not the user’s independent PostgreSQL target.
+
+The PostgreSQL schema is server-side configuration. Never place `DATABASE_URL` in client code or a `VITE_` variable.
+
+| Environment variable | Purpose |
 |---|---|
-| `VITE_FIREBASE_API_KEY` | `apiKey` |
-| `VITE_FIREBASE_AUTH_DOMAIN` | `authDomain` |
-| `VITE_FIREBASE_PROJECT_ID` | `projectId` |
-| `VITE_FIREBASE_STORAGE_BUCKET` | `storageBucket` |
-| `VITE_FIREBASE_MESSAGING_SENDER_ID` | `messagingSenderId` |
-| `VITE_FIREBASE_APP_ID` | `appId` |
-| `VITE_FIREBASE_MEASUREMENT_ID` | Optional Analytics measurement ID |
-| `VITE_FIREBASE_ENABLED` | Keep `false` until rules and migration are complete |
+| `DATABASE_URL` | PostgreSQL connection string for the server |
+| `AUTH_SECRET` | Secret used by the independent authentication adapter |
+| `AUTH_BASE_URL` | Public application URL used by the independent authentication adapter |
 
-Do not upload a Firebase service-account JSON file to the browser, Git repository, or public storage. Do not enable Firebase as a second source of truth without a migration plan for users, organizations, tickets, media, reminders, and audit logs.
+Do not commit database passwords, authentication secrets, provider keys, or service-account files. Keep PostgreSQL as the only source of truth for organizations, users, tickets, media metadata, reminders, and audit logs.
 
 ## 6. Where environment values belong
 
@@ -100,7 +109,7 @@ Use the project’s secure environment/secrets management interface for real cre
 | Resend API key, Twilio Auth Token, database credentials, server OAuth secrets | Managed project secrets |
 | Project name, Arabic project name, logo URL, primary color, accent color | Maintainr Developer Settings |
 | Email/SMS enabled or disabled | Maintainr Developer Settings, with safe disabled defaults |
-| Firebase Web App identifiers | Client environment configuration only if Firebase is deliberately enabled |
+| PostgreSQL connection and independent auth secrets | Server-side deployment secret manager only |
 | Public domain and favicon | Project Management UI settings |
 
 If you are asked to enter a secret in chat, do not paste it into the conversation. Use the secure secret card or project secret manager instead.
@@ -128,7 +137,5 @@ After publishing, open the production URL in a private browser window and test s
 [3]: https://resend.com/docs/create-an-api-key "Resend: Create an API key"
 [4]: https://www.twilio.com/docs/messaging/quickstart "Twilio SMS developer quickstart"
 [5]: https://www.twilio.com/docs/iam/api/authtoken "Twilio REST API: Auth Token"
-[6]: https://firebase.google.com/docs/web/setup "Firebase: Add Firebase to your JavaScript project"
-[7]: https://firebase.google.com/docs/rules "Firebase Security Rules"
-[8]: https://manus.im/docs/website-builder/publishing "Manus: Publishing"
-[9]: https://manus.im/docs/website-builder/custom-domains "Manus: Custom Domains"
+[6]: https://manus.im/docs/website-builder/publishing "Manus: Publishing"
+[7]: https://manus.im/docs/website-builder/custom-domains "Manus: Custom Domains"

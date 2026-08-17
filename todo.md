@@ -168,13 +168,13 @@
 - [ ] Choose and document an independent deployment architecture that does not depend on Manus OAuth or Manus hosting.
 - [ ] Replace Manus OAuth with the selected independent authentication provider and preserve exact role routing.
 - [ ] Replace or independently host the database, media storage, scheduled reminders, and notification integrations.
-- [ ] Add independent environment templates, migration instructions, domain setup, backups, and production deployment configuration.
+- [x] Add independent environment templates, migration instructions, domain setup, backups, and production deployment configuration.
 - [ ] Run independent-hosting release verification without a Manus login redirect.
 
-- [ ] Audit all MySQL-specific schema builders, Drizzle configuration, migrations, query operators, and environment references.
-- [ ] Convert the active schema and Drizzle configuration to PostgreSQL without removing required business tables or role fields.
-- [ ] Generate one standalone PostgreSQL SQL import file with tables, enums, indexes, foreign keys, defaults, and safe idempotent setup.
-- [ ] Convert server queries and database helpers to PostgreSQL-compatible behavior and document the required DATABASE_URL.
-- [ ] Remove unused Firebase/legacy configuration and files only after confirming no active code or documentation depends on them.
-- [ ] Document the remaining independent-auth and deployment migration boundary so no Manus OAuth redirect is mistaken for a standalone release.
-- [ ] Run PostgreSQL schema/query tests, TypeScript validation, and the full regression suite before saving a migration checkpoint.
+- [x] Audit all MySQL-specific schema builders, Drizzle configuration, migrations, query operators, and environment references.
+- [x] Convert the active schema and Drizzle configuration to PostgreSQL without removing required business tables or role fields.
+- [x] Generate one standalone PostgreSQL SQL import file with tables, enums, indexes, foreign keys, defaults, and safe idempotent setup.
+- [x] Convert server queries and database helpers to PostgreSQL-compatible behavior and document the required DATABASE_URL.
+- [x] Remove unused Firebase/legacy configuration and files only after confirming no active code or documentation depends on them.
+- [x] Document the remaining independent-auth and deployment migration boundary so no Manus OAuth redirect is mistaken for a standalone release.
+- [x] Run PostgreSQL schema/query tests, TypeScript validation, and the full regression suite before saving a migration checkpoint.
