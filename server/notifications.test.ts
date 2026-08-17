@@ -14,6 +14,7 @@ describe("notification configuration", () => {
   it("falls back safely when email credentials are absent", async () => {
     expect(notificationsConfigured()).toBe(false);
     await expect(sendTicketEmail({ event: "TICKET_CREATED", recipientEmail: "resident@example.com", subject: "New ticket", text: "Created" })).resolves.toMatchObject({ delivered: false, mode: "fallback" });
+    await expect(sendTicketEmail({ event: "ROLE_APPLICATION_SUBMITTED", recipientEmail: "manager@example.com", subject: "Application", text: "Review" })).resolves.toMatchObject({ delivered: false, mode: "fallback" });
   });
 
   it("does not enable Twilio unless explicitly configured", () => {

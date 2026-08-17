@@ -26,7 +26,10 @@ export async function submitRoleApplication(input: { managerEmail: string; reque
   const managerEmail = normalizeEmail(input.managerEmail);
   const applicantEmail = normalizeEmail(input.email);
   const result = await db.insert(roleApplications).values({ managerEmail, requestedRole: input.requestedRole, name: input.name.trim(), email: applicantEmail, phone: input.phone?.trim() || null, message: input.message?.trim() || null }).returning({ id: roleApplications.id });
-  return { success: true as const, applicationId: result[0]?.id ?? null };
+  const roleLabel = input.requestedRole === "TECHNICIAN" ? "Technician / فني" : "Tenant / مستأجر";
+  const managerDelivery = await sendTicketEmail({ event: "ROLE_APPLICATION_SUBMITTED", recipientEmail: managerEmail, subject: `New Maintainr ${roleLabel} application / طلب وصول جديد`, text: `A new ${roleLabel} application was submitted by ${input.name.trim()} (${applicantEmail}). Review it in your Maintainr Manager dashboard.\n\nتم تقديم طلب وصول جديد من ${input.name.trim()} (${applicantEmail}). راجع الطلب من لوحة مدير Maintainr.` });
+  const applicantDelivery = await sendTicketEmail({ event: "ROLE_APPLICATION_SUBMITTED", recipientEmail: applicantEmail, subject: "Maintainr application received / تم استلام طلب Maintainr", text: `Hello ${input.name.trim()}, your ${roleLabel} application was received. The Property Manager will review it. If approved, you will receive a secure invitation to create your own password.\n\nمرحباً ${input.name.trim()}، تم استلام طلبك. سيراجعه مدير العقار، وإذا تمت الموافقة ستصلك دعوة آمنة لإنشاء كلمة المرور الخاصة بك.` });
+  return { success: true as const, applicationId: result[0]?.id ?? null, managerEmailDelivered: managerDelivery.delivered, applicantEmailDelivered: applicantDelivery.delivered };
 }
 
 export async function listApplications(managerEmail: string) {
@@ -56,7 +59,7 @@ export async function approveApplication(applicationId: number, manager: User, u
   await db.insert(accountInvitations).values({ organizationId: manager.organizationId, requestedRole: application.requestedRole, name: application.name, email: application.email, phone: application.phone, unitId: unitId ?? null, tokenHash: hashToken(rawToken), expiresAt: new Date(Date.now() + INVITATION_TTL_MS), createdById: manager.id });
   await db.update(roleApplications).set({ status: "APPROVED", organizationId: manager.organizationId, requestedUnitId: unitId ?? null, reviewedById: manager.id, reviewedAt: new Date() }).where(eq(roleApplications.id, applicationId));
   const url = invitationUrl(rawToken);
-  const delivery = await sendTicketEmail({ event: "ACCOUNT_INVITATION", recipientEmail: application.email, subject: "Your Maintainr account invitation", text: `Hello ${application.name}, your Maintainr application was approved. Create your own password here: ${url}. This invitation expires in 48 hours.` });
+  const delivery = await sendTicketEmail({ event: "ACCOUNT_INVITATION", recipientEmail: application.email, subject: "Your Maintainr account invitation / دعوة حساب Maintainr", text: `Hello ${application.name}, your Maintainr application was approved. Create your own password here: ${url}. This invitation expires in 48 hours.\n\nمرحباً ${application.name}، تمت الموافقة على طلبك. أنشئ كلمة المرور الخاصة بك من خلال الرابط الآمن أعلاه. تنتهي الدعوة خلال 48 ساعة.` });
   return { success: true as const, delivered: delivery.delivered };
 }
 

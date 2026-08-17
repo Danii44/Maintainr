@@ -256,6 +256,17 @@
 - [x] Provide a distinct protected Real Estate Manager administration screen for users, approvals, assignments, password-reset actions, settings, and history.
 - [x] Validate the revised public and role-aware navigation on desktop and mobile in both languages.
 
-- [ ] Diagnose why maintainr-demo.netlify.app still serves the pre-redesign home page.
-- [ ] Verify Netlify is connected to Danii44/Maintainr `main` and deploying the latest public commit.
-- [ ] Trigger or document the correct Netlify redeploy and verify the updated live home page.
+- [x] Diagnose why maintainr-demo.netlify.app still serves the pre-redesign home page: the latest checkpoint had not yet been pushed to the GitHub remote Netlify uses.
+- [x] Verify Netlify is connected to Danii44/Maintainr `main` and push the latest revised checkpoint to that branch.
+- [x] Trigger or document the correct Netlify redeploy and verify the updated live home page.
+
+- [x] Email the Property Manager when a Tenant or Technician application is submitted.
+- [x] Email the applicant after Manager approval with a bilingual secure invitation link to create their own password.
+- [x] Document that dashboard delivery works without Resend, while email delivery requires Resend configuration.
+
+- [x] Add the APPLICATION_SUBMITTED notification event and bilingual emails to both the Property Manager and applicant.
+- [x] Update Supabase/Netlify documentation for application-received alerts and secure approval invitations.
+- [x] Add regression coverage for the new application notification event’s safe fallback behavior.
+- [ ] Complete authenticated release QA for Manager, Tenant, Technician, and Flat Owner accounts on the deployed Netlify site.
+- [ ] Create the final distributable checkpoint and provide Publish-action handoff instructions.
+

@@ -115,7 +115,7 @@ If you are asked to enter a secret in chat, do not paste it into the conversatio
 
 ## 7. Test the complete product before publishing
 
-First, set `BOOTSTRAP_MANAGER_EMAIL` and test local email/password sign-in and sign-up with separate accounts. Test `/forgot-password` and `/reset-password` with Resend configured, then verify logout revokes the active session. Confirm that a new user can complete `/join-unit` with a valid six-digit code and that an invalid code is rejected. Confirm that each exact role reaches only its own portal.
+First, set `BOOTSTRAP_MANAGER_EMAIL` and test local email/password sign-in and sign-up with separate accounts. Public Tenant and Technician access is requested through `/apply`; the application is saved in the Manager dashboard. With Resend configured, Maintainr emails both the Property Manager and applicant when the application is submitted. The Manager approves or rejects it, and an approved applicant receives a bilingual, single-use invitation link to create a personal password; no permanent password is sent by email. Test `/forgot-password` and `/reset-password` with Resend configured, then verify logout revokes the active session. Confirm that a new user can complete `/join-unit` with a valid six-digit code and that an invalid code is rejected. Confirm that each exact role reaches only its own portal.
 
 Next, use the manager portal to create a ticket, assign a technician, change priority, and review the audit history. Use the tenant portal to create a request with multiple attachments. Use the technician portal to upload proof media and resolution notes; verify that resolution cannot be submitted without both. Use the owner portal to review the scoped reminder and ticket information.
 
