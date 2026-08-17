@@ -311,3 +311,11 @@
 - [x] Design a safe demo journey that showcases realistic workflows without exposing one customer workspace to another.
 - [x] Define product packaging, feature tiers, demo data boundaries, and conversion points for real-estate companies.
 - [x] Produce a phased product-readiness roadmap covering product, operations, security, support, billing, and deployment requirements.
+
+- [x] Define and document the public marketing site, isolated demo workspace, and production SaaS separation with explicit data and access boundaries.
+- [x] Redesign the public Home into a conversion-focused product website that explains Maintainr’s maintenance workflows, role portals, bilingual value, security, and customer journey.
+- [x] Add polished product visuals, motion design, and a lightweight media showcase without making the marketing page slow or relying on fake testimonials.
+- [x] Add clear public conversion routes for interactive demo, free workspace trial, guided demo request, and existing-customer sign-in.
+- [x] Build a dedicated demo interface that uses only isolated sample data and never exposes a production organization’s users, tickets, media, reminders, settings, or branding.
+- [ ] Add demo lifecycle, expiry, rate-limit, and cleanup controls before enabling public demo registrations.
+- [x] Preserve the real multi-workspace Maintainr product as the separate sellable SaaS surface with protected production workflows and billing-ready boundaries.

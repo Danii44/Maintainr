@@ -5,6 +5,12 @@ import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { LanguageProvider } from "./contexts/LanguageContext";
+import { Toaster } from "@/components/ui/sonner";
+import { PublicProductSurface } from "./pages/PublicProductSurface";
+import { InteractiveDemo } from "./pages/InteractiveDemo";
+import { isPublicProductSurface } from "../../shared/productSurface";
 import "./index.css";
 
 const queryClient = new QueryClient();
@@ -54,10 +60,16 @@ const trpcClient = trpc.createClient({
   ],
 });
 
+function RootSurface() {
+  const pathname = typeof window === "undefined" ? "/" : window.location.pathname;
+  if (isPublicProductSurface(pathname)) return <ThemeProvider defaultTheme="dark"><LanguageProvider><Toaster/>{pathname === "/demo" ? <InteractiveDemo/> : <PublicProductSurface/>}</LanguageProvider></ThemeProvider>;
+  return <App />;
+}
+
 createRoot(document.getElementById("root")!).render(
   <trpc.Provider client={trpcClient} queryClient={queryClient}>
     <QueryClientProvider client={queryClient}>
-      <App />
+      <RootSurface />
     </QueryClientProvider>
   </trpc.Provider>
 );
