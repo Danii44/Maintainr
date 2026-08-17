@@ -317,5 +317,10 @@
 - [x] Add polished product visuals, motion design, and a lightweight media showcase without making the marketing page slow or relying on fake testimonials.
 - [x] Add clear public conversion routes for interactive demo, free workspace trial, guided demo request, and existing-customer sign-in.
 - [x] Build a dedicated demo interface that uses only isolated sample data and never exposes a production organization’s users, tickets, media, reminders, settings, or branding.
-- [ ] Add demo lifecycle, expiry, rate-limit, and cleanup controls before enabling public demo registrations.
+- [x] Add demo lifecycle, expiry, rate-limit, and cleanup controls before enabling public demo registrations.
 - [x] Preserve the real multi-workspace Maintainr product as the separate sellable SaaS surface with protected production workflows and billing-ready boundaries.
+
+- [x] Provision a separate demo-only Supabase project and demo-only storage boundary without changing the production workspace database.
+- [x] Add controlled demo session creation, labelled sample operational records, and explicit blocking of production queries, provider messages, exports, and webhooks.
+- [x] Add deterministic expiry, rate-limit, and cleanup routines for demo sessions and demo media, with public registration disabled until deployment validation.
+- [x] Validate that demo-only configuration, sample records, and cleanup behavior cannot access or alter production organization data.

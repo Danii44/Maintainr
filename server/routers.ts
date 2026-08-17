@@ -15,6 +15,7 @@ import { canMutateManagerTicket } from "../shared/managerActionRules";
 import { completionMutationError, statusMutationError } from "../shared/ticketMutationRules";
 import { canAcknowledgeReminder, filterRemindersForViewer } from "../shared/reminderRules";
 import { reminderError } from "../shared/reminderErrors";
+import { createDemoSession, publicDemoRegistrationEnabled } from "./demoSessions";
 
 const category = z.enum(["PLUMBING", "ELECTRICAL", "HVAC", "APPLIANCE", "OTHER"]);
 const priority = z.enum(["LOW", "MEDIUM", "HIGH", "EMERGENCY"]);
@@ -31,6 +32,22 @@ const technicianOnly = protectedProcedure.use(({ ctx, next }) => {
 
 export const appRouter = router({
   system: systemRouter,
+  demo: router({
+    status: publicProcedure.query(() => ({ publicRegistrationEnabled: publicDemoRegistrationEnabled(), mode: publicDemoRegistrationEnabled() ? "isolated-database" : "static-preview" })),
+    start: publicProcedure.mutation(async ({ ctx }) => {
+      const forwarded = ctx.req.headers["x-forwarded-for"];
+      const ipAddress = typeof forwarded === "string" ? forwarded.split(",")[0].trim() : ctx.req.ip ?? "unknown";
+      const session = await createDemoSession(ipAddress);
+      ctx.res.cookie("maintainr_demo_session", session.token, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 24 * 60 * 60,
+        path: "/demo",
+      });
+      return { expiresAt: session.expiresAt, workspaceId: session.workspaceId };
+    }),
+  }),
   workspace: router({
     onboarding: managerOnly.query(async ({ ctx }) => {
       const db = await getDb();
