@@ -224,6 +224,6 @@
 - [x] Validate the corrected PostgreSQL schema and update the public GitHub schema file.
 - [x] Provide safe retry instructions for a failed or partially applied Supabase schema import.
 
-- [ ] Fix Netlify Function bundling failure from Vite/Tailwind native build dependencies and missing Babel preset resolution.
-- [ ] Validate a successful Netlify build with the current environment-variable configuration.
-- [ ] Push the Netlify build fix and document the redeploy step.
+- [x] Fix Netlify Function bundling failure from Vite/Tailwind native build dependencies and missing Babel preset resolution.
+- [x] Validate a successful Netlify build with the current environment-variable configuration.
+- [x] Push the Netlify build fix and document the redeploy step.
