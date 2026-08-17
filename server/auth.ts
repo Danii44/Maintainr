@@ -3,7 +3,7 @@ import { promisify } from "node:util";
 import type { Request } from "express";
 import { parse as parseCookie } from "cookie";
 import { eq, and, gt, isNull, ne } from "drizzle-orm";
-import { users, sessions, passwordResetTokens, type User } from "../drizzle/schema";
+import { users, sessions, passwordResetTokens, organizations, developerSettings, properties, type User } from "../drizzle/schema";
 import { sendTicketEmail } from "./notifications";
 import { getDb } from "./db";
 import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
@@ -171,6 +171,69 @@ export async function register(email: string, password: string, name: string) {
   }
   const session = await createSession(user.id);
   return { user, ...session };
+}
+
+export type WorkspaceRegistrationInput = {
+  email: string;
+  password: string;
+  name: string;
+  organizationName: string;
+  organizationNameArabic?: string;
+  portfolioCategory?: string;
+  portfolioSizeRange?: string;
+  firstPropertyName?: string;
+  firstPropertyAddress?: string;
+};
+
+export async function registerWorkspace(input: WorkspaceRegistrationInput) {
+  const normalizedEmail = normalizeEmail(input.email);
+  if (isRateLimited(`workspace:${normalizedEmail}`)) throw new Error("Too many attempts. Try again later / محاولات كثيرة. حاول لاحقاً");
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable / قاعدة البيانات غير متاحة");
+  const existing = (await db.select({ id: users.id }).from(users).where(eq(users.email, normalizedEmail)).limit(1))[0];
+  if (existing) throw new Error("An account already exists for this email. Sign in instead / يوجد حساب بهذا البريد. سجل الدخول بدلاً من ذلك");
+
+  const passwordHash = await hashPassword(input.password);
+  const created = await db.transaction(async (tx) => {
+    const organization = (await tx.insert(organizations).values({
+      name: input.organizationName.trim(),
+      portfolioCategory: input.portfolioCategory || null,
+      portfolioSizeRange: input.portfolioSizeRange || null,
+    }).returning())[0];
+    if (!organization) throw new Error("Unable to create workspace / تعذر إنشاء مساحة العمل");
+
+    const manager = (await tx.insert(users).values({
+      openId: `workspace_${randomUUID()}`,
+      organizationId: organization.id,
+      email: normalizedEmail,
+      name: input.name.trim(),
+      passwordHash,
+      loginMethod: "password",
+      role: "PROPERTY_MANAGER",
+      lastSignedIn: new Date(),
+    }).returning())[0];
+    if (!manager) throw new Error("Unable to create workspace owner / تعذر إنشاء مالك مساحة العمل");
+
+    await tx.insert(developerSettings).values({
+      organizationId: organization.id,
+      projectName: input.organizationName.trim(),
+      projectNameArabic: input.organizationNameArabic?.trim() || input.organizationName.trim(),
+      updatedById: manager.id,
+    });
+
+    if (input.firstPropertyName?.trim() && input.firstPropertyAddress?.trim()) {
+      await tx.insert(properties).values({
+        organizationId: organization.id,
+        name: input.firstPropertyName.trim(),
+        address: input.firstPropertyAddress.trim(),
+      });
+    }
+
+    return { organization, manager };
+  });
+
+  const session = await createSession(created.manager.id);
+  return { user: created.manager, organization: created.organization, ...session };
 }
 
 export function sessionCookieOptions(req: Request) {

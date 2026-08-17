@@ -5,6 +5,7 @@ import type { TrpcContext } from "./_core/context";
 const authMocks = vi.hoisted(() => ({
   authenticate: vi.fn(),
   register: vi.fn(),
+  registerWorkspace: vi.fn(),
   requestPasswordReset: vi.fn(),
   resetPassword: vi.fn(),
   updateProfile: vi.fn(),
@@ -42,6 +43,15 @@ describe("local auth router", () => {
     const result = await appRouter.createCaller(ctx).auth.signUp({ name: "Local User", email: "local@example.com", password: "password123" });
     expect(result.role).toBe("PROPERTY_MANAGER");
     expect(authMocks.register).toHaveBeenCalledWith("local@example.com", "password123", "Local User");
+  });
+
+  it("creates an isolated Manager workspace and sets its private session cookie", async () => {
+    authMocks.registerWorkspace.mockResolvedValue({ user, organization: { id: 21, name: "Northstar Realty" }, token: "workspace-session" });
+    const { ctx, cookies } = context();
+    const input = { name: "Workspace Owner", email: "owner@northstar.example", password: "password123", organizationName: "Northstar Realty", organizationNameArabic: "نورث ستار", portfolioCategory: "MULTI_FAMILY" as const, portfolioSizeRange: "11-50" as const, firstPropertyName: "Northstar Tower", firstPropertyAddress: "123 Market Street" };
+    await expect(appRouter.createCaller(ctx).auth.createWorkspace(input)).resolves.toEqual(user);
+    expect(authMocks.registerWorkspace).toHaveBeenCalledWith(input);
+    expect(cookies[0]).toMatchObject({ name: "app_session_id", value: "workspace-session", options: { httpOnly: true, secure: true, sameSite: "lax" } });
   });
 
   it("updates the authenticated profile and changes its password through protected procedures", async () => {

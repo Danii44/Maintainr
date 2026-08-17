@@ -169,7 +169,7 @@
 - [x] Replace Manus OAuth with self-hosted PostgreSQL email/password authentication and preserve exact role routing.
 - [x] Define independent PostgreSQL, S3-compatible media, portable scheduled-reminder, Resend, and optional Twilio integrations for Netlify.
 - [x] Add independent environment templates, migration instructions, domain setup, backups, and production deployment configuration.
-- [ ] Run independent-hosting release verification without a Manus login redirect.
+- [x] Run independent-hosting release verification without a Manus login redirect.
 
 - [x] Audit all MySQL-specific schema builders, Drizzle configuration, migrations, query operators, and environment references.
 - [x] Convert the active schema and Drizzle configuration to PostgreSQL without removing required business tables or role fields.
@@ -274,7 +274,7 @@
 - [x] Remove the separate Manager administration public entry point and use one shared role-aware Sign in action with automatic post-login routing.
 - [x] Verify the simplified navigation visually and with role-routing regression coverage.
 - [x] Rework Manager, Tenant, Technician, and Flat Owner portal layouts for mobile-first use with touch-friendly controls and no horizontal overflow.
-- [ ] Audit all visible portal buttons and actions for working handlers, loading states, errors, and role-appropriate permissions.
+- [x] Audit all visible portal buttons and actions for working handlers, loading states, errors, and role-appropriate permissions.
 - [ ] Verify cross-role synchronization for users, units, tickets, assignments, reminders, media, audit history, and automatic role routing.
 - [x] Add or update regression coverage for repaired mobile and role workflow behavior.
 - [ ] Complete responsive screenshots and authenticated role QA for the four demo accounts.
@@ -288,3 +288,21 @@
 - [x] Repair Tenant ticket validation, colors, and submission guidance with clear title/detail requirements and accessible controls.
 - [x] Replace Technician hard-coded job wording with live assigned-job counts and add profile/password access.
 - [ ] Verify all four role dashboards, mobile layouts, branding propagation, and cross-role synchronization after the UX redesign.
+- [x] Audit every project file and folder for stale platform-dependent code, demo copy, placeholder actions, deployment inconsistencies, and publish blockers.
+- [x] Rewrite public, onboarding, authentication, portal, empty-state, validation, error, and settings copy in a consistent industry-style English/Arabic voice.
+- [x] Implement first-run organization branding setup for name, Arabic name, logo, primary color, and accent color, persisted in PostgreSQL and reused globally.
+- [x] Generate and propagate a favicon from the configured logo without asking for branding again after first-run setup.
+- [x] Update installation, deployment, onboarding, and operator documentation to describe the first-run branding flow and final production behavior.
+- [ ] Complete final content, responsive, role, database, build, and publication-readiness verification before the final checkpoint.
+
+- [x] Inspect RunFleet’s public demo/onboarding journey and document relevant self-service workspace patterns without copying its brand or interface.
+- [x] Compare Maintainr’s current single-bootstrap organization flow with a multi-workspace SaaS model and define safe organization isolation requirements.
+- [x] Design an owner-led self-service real-estate workspace signup flow with one-time organization setup, Manager ownership, and role invitations.
+- [x] Implement the approved multi-workspace onboarding changes and add regression coverage for workspace isolation.
+- [x] Verify that one organization cannot access another organization’s users, tickets, media, reminders, settings, or branding.
+
+- [x] Add workspace signup fields for Manager identity, organization name, portfolio category, portfolio-size range, and optional first property details.
+- [x] Create the organization, first Property Manager, developer-settings defaults, and private session atomically during self-service signup.
+- [ ] Add a one-time bilingual workspace setup checklist for branding, first property, and unit setup without exposing provider secrets.
+- [x] Replace the bootstrap-email-only public registration restriction with safe, rate-limited workspace registration while preserving invitation-only participant accounts.
+- [x] Add direct tests for duplicate workspace creator email, cross-organization data isolation, Manager ownership, and invitation scoping.

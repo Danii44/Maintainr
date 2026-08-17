@@ -27,6 +27,9 @@ SELECT maintainr_create_enum('reminderRunStatus', ARRAY['PENDING','SENT']);
 CREATE TABLE IF NOT EXISTS "organizations" (
   "id" serial PRIMARY KEY,
   "name" varchar(255) NOT NULL,
+  "portfolioCategory" varchar(64),
+  "portfolioSizeRange" varchar(24),
+  "onboardingCompletedAt" timestamptz,
   "subscriptionTier" "subscriptionTier" NOT NULL DEFAULT 'STARTER',
   "stripeCustomerId" varchar(255),
   "createdAt" timestamptz NOT NULL DEFAULT now()

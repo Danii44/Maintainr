@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
-import { authenticate, register, requestPasswordReset, resetPassword, updateProfile, changePassword, revokeSession, getSessionToken, sessionCookieOptions, ONE_YEAR_MS } from "./auth";
+import { authenticate, register, registerWorkspace, requestPasswordReset, resetPassword, updateProfile, changePassword, revokeSession, getSessionToken, sessionCookieOptions, ONE_YEAR_MS } from "./auth";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { getDb } from "./db";
@@ -43,9 +43,15 @@ export const appRouter = router({
       ctx.res.cookie(COOKIE_NAME, result.token, { ...sessionCookieOptions(ctx.req), maxAge: Math.floor(ONE_YEAR_MS / 1000) });
       return result.user;
     }),
+    createWorkspace: publicProcedure.input(z.object({ name: z.string().min(2).max(255), email: z.string().email(), password: z.string().min(8), organizationName: z.string().min(2).max(255), organizationNameArabic: z.string().max(255).optional(), portfolioCategory: z.enum(["MULTI_FAMILY", "RESIDENTIAL", "COMMERCIAL", "MIXED_USE", "OTHER"]), portfolioSizeRange: z.enum(["1-10", "11-50", "51-250", "251-1000", "1000+"]), firstPropertyName: z.string().max(255).optional(), firstPropertyAddress: z.string().max(1000).optional() }).superRefine((value, ctx) => { if (Boolean(value.firstPropertyName?.trim()) !== Boolean(value.firstPropertyAddress?.trim())) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Enter both the first property name and address, or leave both blank / أدخل اسم وعنوان العقار الأول معاً أو اتركهما فارغين" }); })).mutation(async ({ ctx, input }) => {
+      const result = await registerWorkspace(input);
+      ctx.res.cookie(COOKIE_NAME, result.token, { ...sessionCookieOptions(ctx.req), maxAge: Math.floor(ONE_YEAR_MS / 1000) });
+      return result.user;
+    }),
     requestPasswordReset: publicProcedure.input(z.object({ email: z.string().email() })).mutation(({ input }) => requestPasswordReset(input.email)),
     resetPassword: publicProcedure.input(z.object({ token: z.string().min(20), password: z.string().min(8) })).mutation(({ input }) => resetPassword(input.token, input.password)),
     updateProfile: protectedProcedure.input(z.object({ name: z.string().min(2).max(255), phone: z.string().max(32).optional(), avatarUrl: z.string().url().optional().or(z.literal("")) })).mutation(({ ctx, input }) => updateProfile(ctx.user.id, input)),
+    uploadAvatar: protectedProcedure.input(z.object({ fileName: z.string().min(1).max(180), contentType: z.string().regex(/^image\//), data: z.string().min(1).max(7_000_000) })).mutation(async ({ ctx, input }) => { const bytes = Buffer.from(input.data, "base64"); if (bytes.byteLength > 5 * 1024 * 1024) throw new Error("Profile images must be 5 MB or smaller / يجب ألا تتجاوز صورة الملف الشخصي 5 ميغابايت"); const uploaded = await storagePut(`avatars/${ctx.user.id}/${randomUUID()}-${input.fileName.replace(/[^a-zA-Z0-9._-]/g, "-")}`, bytes, input.contentType); await updateProfile(ctx.user.id, { name: ctx.user.name ?? ctx.user.email ?? "User", avatarUrl: uploaded.url }); return { avatarUrl: uploaded.url }; }),
     changePassword: protectedProcedure.input(z.object({ currentPassword: z.string().min(8), nextPassword: z.string().min(8) })).mutation(async ({ ctx, input }) => changePassword(ctx.user.id, input.currentPassword, input.nextPassword, await getSessionToken(ctx.req))),
     acceptInvitation: publicProcedure.input(z.object({ token: z.string().min(20), password: z.string().min(8) })).mutation(async ({ ctx, input }) => {
       const user = await acceptInvitation(input.token, input.password);
@@ -157,6 +163,13 @@ export const appRouter = router({
     }),
   }),
   settings: router({
+    public: publicProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) return null;
+      const current = (await db.select().from(developerSettings).orderBy(developerSettings.id).limit(1))[0];
+      if (!current) return null;
+      return { projectName: current.projectName, projectNameArabic: current.projectNameArabic, logoUrl: current.logoUrl, primaryColor: current.primaryColor, accentColor: current.accentColor };
+    }),
     get: protectedProcedure.query(async ({ ctx }) => {
       const db = await getDb();
       if (!db || !ctx.user.organizationId) return null;

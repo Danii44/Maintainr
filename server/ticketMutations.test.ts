@@ -70,6 +70,14 @@ describe("ticket mutation procedures", () => {
     expect(db.inserts).toHaveLength(4);
   });
 
+  it("rejects ticket media uploads when the organization-scoped ticket lookup has no match", async () => {
+    const crossOrgDb = createDb([]);
+    getDbMock.mockResolvedValueOnce(crossOrgDb);
+    const caller = appRouter.createCaller(createContext("TENANT"));
+    await expect(caller.tickets.attachMedia({ ticketId: 501, fileName: "private.jpg", contentType: "image/jpeg", base64Data: "data:image/jpeg;base64,ZmFrZS1pbWFnZS1ieXRlcw==" })).rejects.toThrow("Ticket not found in your organization");
+    expect(crossOrgDb.inserts).toHaveLength(0);
+  });
+
   it("binds a first-time tenant to a unit through the protected join procedure", async () => {
     const db = createDb([{ id: 9, organizationId: 1, accessCode: "123456" }]);
     getDbMock.mockResolvedValueOnce(db);

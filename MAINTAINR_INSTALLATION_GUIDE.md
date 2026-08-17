@@ -94,7 +94,7 @@ The PostgreSQL schema is server-side configuration. Never place `DATABASE_URL` i
 | Environment variable | Purpose |
 |---|---|
 | `DATABASE_URL` | PostgreSQL connection string for the server |
-| `BOOTSTRAP_MANAGER_EMAIL` | Email that receives the first `PROPERTY_MANAGER` role during signup |
+| `BOOTSTRAP_MANAGER_EMAIL` | Optional legacy bootstrap email for the deprecated `/sign-up` compatibility route; not required for self-service workspaces |
 | `AUTH_BASE_URL` | Public HTTPS URL used in password-reset links |
 
 Do not commit database passwords, authentication secrets, provider keys, or service-account files. Keep PostgreSQL as the only source of truth for organizations, users, tickets, media metadata, reminders, and audit logs.
@@ -105,17 +105,29 @@ Use the project’s secure environment/secrets management interface for real cre
 
 | Value type | Correct location |
 |---|---|
-| Resend API key, Twilio Auth Token, database credentials, bootstrap email, and reset configuration | Managed project secrets |
-| Project name, Arabic project name, logo URL, primary color, accent color | Maintainr Developer Settings |
-| Email/SMS enabled or disabled | Maintainr Developer Settings, with safe disabled defaults |
+| Resend API key, Twilio Auth Token, database credentials, optional legacy bootstrap email, and reset configuration | Managed server-side secrets |
+| Organization name, Arabic name, logo, primary color, and accent color | Maintainr’s one-time Manager workspace setup |
+| Email/SMS enabled or disabled | Maintainr Settings, with safe disabled defaults |
 | PostgreSQL connection and independent auth secrets | Server-side deployment secret manager only |
-| Public domain and favicon | Project Management UI settings |
+| Public domain and deployment visibility | Netlify or the selected hosting provider |
+
+### Create a secure workspace
+
+After deployment, any real-estate company can select **Create workspace** from the public Home page, or open `/create-workspace`. The first Property Manager provides a work email, personal name and password, organization name in English and optionally Arabic, portfolio category, portfolio-size range, and optionally the first property name and address. The server normalizes the email, rate-limits registration, hashes the password, and creates the organization, Manager account, organization settings defaults, optional first property, and a private session in one database transaction.
+
+Every created workspace receives its own organization identifier. Maintainr scopes users, tickets, media metadata, properties, units, reminders, settings, branding, invitations, and audit history to that identifier. A Manager can subsequently invite tenants, technicians, and owners, while Tenants and Technicians may use `/apply` for Manager approval. Participants do not create organizations and never need to share a Manager password.
+
+### First-run organization branding
+
+After the first Manager account signs in, open **Workspace settings** and complete the one-time organization setup. Enter the organization’s English name, Arabic name, logo URL, primary color, and accent color, then save the identity. These values are stored in the PostgreSQL `developerSettings` record for the organization. Maintainr reads them in the public Home, sign-in screen, every role portal, page title, theme variables, and browser favicon. The configured logo replaces the default Maintainr favicon automatically; there is no second branding form and no need to edit React code.
+
+The logo should be an HTTPS image URL that is reachable by browsers, ideally an S3-compatible object URL or a CDN URL. Keep the logo square or close to square, use a transparent background when appropriate, and verify both the English and Arabic names before inviting users. Branding writes remain Manager-only, while authenticated portals receive read-only branding so every role sees the same organization identity.
 
 If you are asked to enter a secret in chat, do not paste it into the conversation. Use the secure secret card or project secret manager instead.
 
 ## 7. Test the complete product before publishing
 
-First, set `BOOTSTRAP_MANAGER_EMAIL` and test local email/password sign-in and sign-up with separate accounts. Public Tenant and Technician access is requested through `/apply`; the application is saved in the Manager dashboard. With Resend configured, Maintainr emails both the Property Manager and applicant when the application is submitted. The Manager approves or rejects it, and an approved applicant receives a bilingual, single-use invitation link to create a personal password; no permanent password is sent by email. Test `/forgot-password` and `/reset-password` with Resend configured, then verify logout revokes the active session. Confirm that a new user can complete `/join-unit` with a valid six-digit code and that an invalid code is rejected. Confirm that each exact role reaches only its own portal.
+First, create a new organization through **Create workspace** and confirm the creator is routed directly to `/manager`. In the Manager portal, complete the one-time Workspace settings form for the organization name, Arabic name, logo, theme colors, and favicon identity. Create a second workspace with a different email and confirm that the two Managers do not see each other’s properties, users, tickets, reminders, or branding. Public Tenant and Technician access is requested through `/apply`; the application is saved in the relevant Manager dashboard. With Resend configured, Maintainr emails both the Property Manager and applicant when the application is submitted. The Manager approves or rejects it, and an approved applicant receives a bilingual, single-use invitation link to create a personal password; no permanent password is sent by email. Test `/forgot-password` and `/reset-password` with Resend configured, then verify logout revokes the active session. Confirm that a new user can complete `/join-unit` with a valid six-digit code and that an invalid code is rejected. Confirm that each exact role reaches only its own portal.
 
 Next, use the manager portal to create a ticket, assign a technician, change priority, and review the audit history. Use the tenant portal to create a request with multiple attachments. Use the technician portal to upload proof media and resolution notes; verify that resolution cannot be submitted without both. Use the owner portal to review the scoped reminder and ticket information.
 
@@ -127,7 +139,7 @@ Switch to Arabic and verify the public pages, authentication, onboarding, manage
 
 Before deployment, confirm that all production secrets are configured, the notification sender domain is verified, the PostgreSQL schema has been imported, the latest tests pass, and a backup has been taken. For Vercel or Netlify, deploy the frontend and adapt the Node/tRPC server to the provider’s server-function model; recurring reminders need a separate cron or worker service. For cPanel, use the Node.js Application Manager or Passenger, configure the server environment values, enable SSL, and configure a reliable cron job. The application must not depend on a Manus login redirect for private operation.
 
-After deployment, open the production URL in a private browser window and test sign-in, sign-up, password reset, logout, `/join-unit`, each portal URL, media upload, email, reminders, and the language switch. Review production logs after the first scheduled reminder callback. Keep database backups enabled and document who can rotate secrets, recover the organization owner account, and disable notification channels during an incident.
+After deployment, open the production URL in a private browser window and test **Create workspace**, shared sign-in, password reset, logout, `/join-unit`, each portal URL, media upload, email, reminders, and the language switch. Review production logs after the first scheduled reminder callback. Keep database backups enabled and document who can rotate secrets, recover an organization owner account, and disable notification channels during an incident.
 
 ## References
 

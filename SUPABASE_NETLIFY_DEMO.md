@@ -8,6 +8,14 @@ Create a project at [supabase.com](https://supabase.com/). Choose a strong datab
 
 For a one-time schema import, open Supabase **SQL Editor**, paste the complete contents of `POSTGRESQL_SCHEMA.sql`, and run it. Then confirm that the tables include `organizations`, `users`, `sessions`, `passwordResetTokens`, `roleApplications`, `accountInvitations`, `maintenanceReminders`, and the remaining application tables. Do not paste the database password into SQL or commit it to Git.
 
+If upgrading an existing Maintainr database created before profile images were added, apply this non-destructive PostgreSQL migration before deployment:
+
+```sql
+ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "avatarUrl" text;
+```
+
+The application reads this column during authentication, so an incomplete migration can make sign-in fail with a users-column query error.
+
 ## 2. Create the Netlify demo site
 
 Create an account at [netlify.com](https://www.netlify.com/), choose **Add new project**, connect the Git repository, and let Netlify read the repository’s `netlify.toml`. The repository already specifies the build command `pnpm build:netlify`, the publish directory `dist/public`, and the Functions directory `netlify/functions`.
@@ -19,7 +27,7 @@ In Netlify, open **Project configuration → Environment variables** and add the
 | Variable | What to enter | Where to get it |
 |---|---|---|
 | `DATABASE_URL` | Supabase transaction-pooler PostgreSQL URL on port `6543` | Supabase dashboard → **Connect** → **Transaction pooler**; URL-encode special password characters if necessary |
-| `BOOTSTRAP_MANAGER_EMAIL` | Your own email address | Choose the email you will use for the first Manager account |
+| `BOOTSTRAP_MANAGER_EMAIL` | Optional legacy compatibility value | Leave unset for the current self-service workspace flow; only needed for the deprecated `/sign-up` route |
 | `AUTH_BASE_URL` | The final HTTPS Netlify URL, such as `https://maintainr-demo.netlify.app` | Netlify site overview after the first site is created; update it if the domain changes |
 | `RESEND_API_KEY` | A restricted send-only key beginning with `re_` | Resend dashboard → API Keys → create a sending key |
 | `NOTIFICATION_FROM_EMAIL` | A sender such as `Maintainr <notifications@your-verified-domain.com>` | Use an address on a domain verified in Resend; for a quick demo, use the sender address allowed by your Resend account |
@@ -35,11 +43,17 @@ The optional `TWILIO_*` variables can remain unset and `TWILIO_ENABLED=false` fo
 
 ## 4. First login
 
-Deploy the site after saving the variables. Open the deployed Netlify URL and choose **Sign up**. Use the exact email configured as `BOOTSTRAP_MANAGER_EMAIL`; the first matching account is assigned the Manager role. Tenants and Technicians should use `/apply` to enter their own email, their requested role, and the Property Manager’s email. The application is stored in the Manager dashboard. When Resend is configured, Maintainr emails both the Property Manager and applicant that the application was received. The Manager reviews applications, approves the request, selects a unit for a Tenant when applicable, and Maintainr sends the applicant a bilingual single-use invitation. The applicant creates their own password at `/invitation?token=...`; never share or email the Manager’s password.
+Deploy the site after saving the variables. Open the deployed Netlify URL and choose **Create workspace**. The first Manager supplies a work email, name, password, organization name, portfolio category, portfolio-size range, and optionally the first property. Maintainr creates a separate organization, its Manager owner, branding defaults, optional property, and a private session atomically; the Manager is then taken to `/manager`. Create a second workspace with a different email to verify that each organization has isolated users, tickets, media, reminders, settings, and branding. Tenants and Technicians should use `/apply` to enter their own email, requested role, and the relevant Property Manager’s email. The application is stored in that Manager’s dashboard. When Resend is configured, Maintainr emails both the Property Manager and applicant that the application was received. The Manager reviews applications, approves the request, selects a unit for a Tenant when applicable, and Maintainr sends the applicant a bilingual single-use invitation. The applicant creates their own password at `/invitation?token=...`; never share or email the Manager’s password.
 
 Open `/api/health` to confirm the Function responds. Open `/api/health/database` to confirm the Supabase connection and schema. If the database check fails, copy only the status and non-secret error text; never share `DATABASE_URL` publicly. Test `/forgot-password` only after adding Resend variables and verifying the sender domain.
 
-## 5. Demo limitations
+## 5. First-run organization identity
+
+After the first Manager account signs in, open **Workspace settings** and refine the organization’s English name, Arabic name, logo URL, primary color, and accent color. Maintainr stores these values in PostgreSQL in that organization’s `developerSettings` row. The values automatically propagate to the authenticated organization’s role dashboards, page titles, theme variables, and browser favicon. The default Maintainr favicon is used until the Manager saves a logo; afterward, the configured logo is used as the favicon without another installation prompt.
+
+The database-backed approach is appropriate for this distributable product because branding belongs to the organization and must be shared consistently by every authenticated role. Keep the logo on an HTTPS S3-compatible or CDN URL, use a square image, and do not place logo bytes or provider secrets in frontend code. Branding reads are safe for public display; branding writes and notification controls remain Manager-only.
+
+## 6. Demo limitations
 
 Netlify Scheduled Functions run only on a published deploy, use UTC, and cannot be invoked directly by a normal public URL. Netlify’s Functions page provides **Run now** for manual testing. The current reminder Function runs every fifteen minutes and processes due reminders from PostgreSQL. Netlify documents a thirty-second limit for Scheduled Functions, so keep each reminder run bounded.[3]
 

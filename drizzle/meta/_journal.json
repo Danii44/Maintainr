@@ -43,6 +43,13 @@
       "when": 1786989771681,
       "tag": "0005_slow_frightful_four",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1786996027302,
+      "tag": "0006_lovely_ultron",
+      "breakpoints": true
     }
   ]
 }

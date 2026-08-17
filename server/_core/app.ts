@@ -4,7 +4,7 @@ import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
-import { handleMaintenanceReminder, handlePortableMaintenanceReminder } from "../reminderScheduler";
+import { handlePortableMaintenanceReminder } from "../reminderScheduler";
 import { registerHealthRoutes } from "../health";
 
 export function createApp() {
@@ -14,7 +14,7 @@ export function createApp() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerStorageProxy(app);
   registerHealthRoutes(app);
-  app.post("/api/scheduled/maintenanceReminder", handleMaintenanceReminder);
+  app.post("/api/scheduled/maintenanceReminder", handlePortableMaintenanceReminder);
   app.post("/api/scheduled/portableMaintenanceReminder", handlePortableMaintenanceReminder);
   app.use("/api/trpc", createExpressMiddleware({ router: appRouter, createContext }));
   return { app, server };

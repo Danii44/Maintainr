@@ -12,6 +12,9 @@ export const reminderRunStatusEnum = pgEnum("reminderRunStatus", ["PENDING", "SE
 export const organizations = pgTable("organizations", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
+  portfolioCategory: varchar("portfolioCategory", { length: 64 }),
+  portfolioSizeRange: varchar("portfolioSizeRange", { length: 24 }),
+  onboardingCompletedAt: timestamp("onboardingCompletedAt", { withTimezone: true }),
   subscriptionTier: subscriptionTierEnum("subscriptionTier").notNull().default("STARTER"),
   stripeCustomerId: varchar("stripeCustomerId", { length: 255 }),
   createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow().notNull(),
