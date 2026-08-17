@@ -214,8 +214,12 @@
 - [x] Add a provider-specific Supabase-to-Netlify demo setup walkthrough for all required environment variables.
 - [x] Explain safe demo publishing and first-login verification without requiring purchase-code licensing.
 
-- [ ] Prepare a public-safe GitHub export for Danii44/Maintainr.git.
-- [ ] Scan tracked and candidate files for secrets, private tokens, generated output, logs, and local deployment artifacts.
-- [ ] Add public-repository metadata and exclude secrets and generated artifacts from the upload.
-- [ ] Push the sanitized project to the authorized public GitHub repository.
-- [ ] Verify the public repository remote and uploaded contents.
+- [x] Prepare a public-safe GitHub export for Danii44/Maintainr.git.
+- [x] Scan tracked and candidate files for secrets, private tokens, generated output, logs, and local deployment artifacts.
+- [x] Add public-repository metadata and exclude secrets and generated artifacts from the upload.
+- [x] Push the sanitized project to the authorized public GitHub repository.
+- [x] Verify the public repository remote and uploaded contents.
+
+- [ ] Fix Supabase import error 42702 caused by ambiguous enum helper variable `value`.
+- [ ] Validate the corrected PostgreSQL schema and update the public GitHub schema file.
+- [ ] Provide safe retry instructions for a failed or partially applied Supabase schema import.

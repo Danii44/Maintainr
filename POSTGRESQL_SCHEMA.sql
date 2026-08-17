@@ -8,11 +8,9 @@ CREATE OR REPLACE FUNCTION maintainr_create_enum(enum_name text, enum_values tex
 RETURNS void
 LANGUAGE plpgsql
 AS $$
-DECLARE
-  value text;
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = enum_name) THEN
-    EXECUTE format('CREATE TYPE %I AS ENUM (%s)', enum_name, array_to_string(ARRAY(SELECT quote_literal(value) FROM unnest(enum_values) AS value), ', '));
+    EXECUTE format('CREATE TYPE %I AS ENUM (%s)', enum_name, array_to_string(ARRAY(SELECT quote_literal(item.enum_value) FROM unnest(enum_values) AS item(enum_value)), ', '));
   END IF;
 END;
 $$;
