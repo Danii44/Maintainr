@@ -158,6 +158,17 @@ describe("ticket mutation procedures", () => {
     await expect(tenantCaller.settings.update({ projectName: "Nope", projectNameArabic: "لا", logoUrl: "", primaryColor: "#8B5CF6", accentColor: "#22D3EE", emailNotificationsEnabled: false, smsNotificationsEnabled: false })).rejects.toThrow("Manager role required / يلزم دور مدير العقار");
   });
 
+  it("persists the Manager workspace checklist completion and blocks non-managers", async () => {
+    const db = createDb([{ id: 1, onboardingCompletedAt: null }]);
+    getDbMock.mockResolvedValue(db);
+    const managerCaller = appRouter.createCaller(createContext("PROPERTY_MANAGER"));
+    await expect(managerCaller.workspace.onboarding()).resolves.toEqual({ completed: false, completedAt: null });
+    await expect(managerCaller.workspace.completeOnboarding()).resolves.toEqual({ success: true });
+    expect(db.updates).toHaveLength(1);
+    const tenantCaller = appRouter.createCaller(createContext("TENANT"));
+    await expect(tenantCaller.workspace.onboarding()).rejects.toThrow("Manager role required / يلزم دور مدير العقار");
+  });
+
   it("enforces technician completion proof, notes, and organization scope through the procedure", async () => {
     const db = createDb([{ id: 88, organizationId: 1, status: "IN_PROGRESS", assignedToId: 30 }]);
     getDbMock.mockResolvedValueOnce(db);

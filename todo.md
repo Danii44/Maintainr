@@ -303,6 +303,6 @@
 
 - [x] Add workspace signup fields for Manager identity, organization name, portfolio category, portfolio-size range, and optional first property details.
 - [x] Create the organization, first Property Manager, developer-settings defaults, and private session atomically during self-service signup.
-- [ ] Add a one-time bilingual workspace setup checklist for branding, first property, and unit setup without exposing provider secrets.
+- [x] Add a one-time bilingual workspace setup checklist for branding, first property, and unit setup without exposing provider secrets.
 - [x] Replace the bootstrap-email-only public registration restriction with safe, rate-limited workspace registration while preserving invitation-only participant accounts.
 - [x] Add direct tests for duplicate workspace creator email, cross-organization data isolation, Manager ownership, and invitation scoping.

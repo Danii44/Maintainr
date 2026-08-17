@@ -8,7 +8,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { getDb } from "./db";
 import { acceptInvitation, approveApplication, listApplications, rejectApplication, submitRoleApplication } from "./invitations";
-import { developerSettings, maintenanceReminders, reminderAcknowledgements, reminderRuns, roleApplications, ticketLogs, ticketMedia, tickets, units, users } from "../drizzle/schema";
+import { developerSettings, maintenanceReminders, organizations, reminderAcknowledgements, reminderRuns, roleApplications, ticketLogs, ticketMedia, tickets, units, users } from "../drizzle/schema";
 import { sendTicketEmail } from "./notifications";
 import { storagePut } from "./storage";
 import { canMutateManagerTicket } from "../shared/managerActionRules";
@@ -31,6 +31,21 @@ const technicianOnly = protectedProcedure.use(({ ctx, next }) => {
 
 export const appRouter = router({
   system: systemRouter,
+  workspace: router({
+    onboarding: managerOnly.query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db || !ctx.user.organizationId) throw new Error(reminderError("database"));
+      const organization = (await db.select({ onboardingCompletedAt: organizations.onboardingCompletedAt }).from(organizations).where(eq(organizations.id, ctx.user.organizationId)).limit(1))[0];
+      if (!organization) throw new Error("Workspace not found in your organization / مساحة العمل غير موجودة في مؤسستك");
+      return { completed: Boolean(organization.onboardingCompletedAt), completedAt: organization.onboardingCompletedAt };
+    }),
+    completeOnboarding: managerOnly.mutation(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db || !ctx.user.organizationId) throw new Error(reminderError("database"));
+      await db.update(organizations).set({ onboardingCompletedAt: new Date() }).where(eq(organizations.id, ctx.user.organizationId));
+      return { success: true };
+    }),
+  }),
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     signIn: publicProcedure.input(z.object({ email: z.string().email(), password: z.string().min(8) })).mutation(async ({ ctx, input }) => {
