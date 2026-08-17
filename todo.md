@@ -227,3 +227,21 @@
 - [x] Fix Netlify Function bundling failure from Vite/Tailwind native build dependencies and missing Babel preset resolution.
 - [x] Validate a successful Netlify build with the current environment-variable configuration.
 - [x] Push the Netlify build fix and document the redeploy step.
+
+- [ ] Diagnose deployed Supabase authentication failure on the users email lookup for test@gmail.com.
+- [ ] Verify deployed database schema columns, connection configuration, and auth query compatibility.
+- [ ] Apply and validate the smallest safe fix, then push the Netlify redeploy update.
+
+- [ ] Rotate the exposed Supabase demo database password and update the Netlify DATABASE_URL without sharing the replacement secret.
+- [ ] Verify the users table columns and exact PostgreSQL error after credential rotation.
+- [ ] Re-test deployed sign-up/sign-in and database health after updating Netlify variables.
+
+- [ ] Surface a safe, useful PostgreSQL error detail for the deployed sign-up/sign-in failure without exposing credentials.
+- [ ] Verify Manager-created or invited Tenant, Technician, and Flat Owner accounts use separate credentials and correct organization/role scope.
+- [ ] Validate that no user workflow requires sharing Manager credentials.
+
+- [x] Add public Tenant/Technician application intake with bilingual form and email details.
+- [x] Add Manager review and approve/reject workflow scoped to the Manager organization.
+- [x] Add secure single-use invitation activation so approved users set their own passwords.
+- [x] Send bilingual invitation emails without emailing permanent passwords or sharing Manager credentials.
+- [x] Add role-scoped account tests and update Supabase schema/deployment documentation.

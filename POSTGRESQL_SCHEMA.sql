@@ -125,6 +125,43 @@ CREATE TABLE IF NOT EXISTS "ticketMedia" (
   "createdAt" timestamptz NOT NULL DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS "roleApplications" (
+  "id" serial PRIMARY KEY,
+  "organizationId" integer,
+  "managerEmail" varchar(320) NOT NULL,
+  "requestedRole" "role" NOT NULL,
+  "name" varchar(255) NOT NULL,
+  "email" varchar(320) NOT NULL,
+  "phone" varchar(32),
+  "message" text,
+  "status" varchar(24) NOT NULL DEFAULT 'PENDING',
+  "requestedUnitId" integer,
+  "reviewedById" integer,
+  "reviewedAt" timestamptz,
+  "createdAt" timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS "role_applications_status_idx" ON "roleApplications" ("status", "createdAt");
+CREATE INDEX IF NOT EXISTS "role_applications_email_idx" ON "roleApplications" ("email");
+
+CREATE TABLE IF NOT EXISTS "accountInvitations" (
+  "id" serial PRIMARY KEY,
+  "organizationId" integer NOT NULL,
+  "requestedRole" "role" NOT NULL,
+  "name" varchar(255) NOT NULL,
+  "email" varchar(320) NOT NULL,
+  "phone" varchar(32),
+  "unitId" integer,
+  "tokenHash" varchar(64) NOT NULL UNIQUE,
+  "expiresAt" timestamptz NOT NULL,
+  "usedAt" timestamptz,
+  "createdById" integer NOT NULL,
+  "createdAt" timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS "account_invites_email_idx" ON "accountInvitations" ("email");
+CREATE INDEX IF NOT EXISTS "account_invites_expiry_idx" ON "accountInvitations" ("expiresAt");
+
 CREATE TABLE IF NOT EXISTS "ticketLogs" (
   "id" serial PRIMARY KEY,
   "ticketId" integer NOT NULL REFERENCES "tickets"("id") ON DELETE CASCADE,

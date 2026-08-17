@@ -1,4 +1,4 @@
-type TicketNotificationEvent = "TICKET_CREATED" | "TICKET_ASSIGNED" | "STATUS_CHANGED" | "TICKET_RESOLVED" | "MAINTENANCE_REMINDER" | "PASSWORD_RESET";
+type TicketNotificationEvent = "TICKET_CREATED" | "TICKET_ASSIGNED" | "STATUS_CHANGED" | "TICKET_RESOLVED" | "MAINTENANCE_REMINDER" | "PASSWORD_RESET" | "ACCOUNT_INVITATION";
 
 type NotificationInput = {
   event: TicketNotificationEvent;

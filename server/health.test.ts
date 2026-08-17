@@ -32,7 +32,7 @@ function createResponse() {
 
 describe("database health routes", () => {
   it("reports a reachable database without returning credentials", async () => {
-    getDbMock.mockResolvedValueOnce({ select: () => ({ from: () => ({ limit: async () => [] }) }) });
+    getDbMock.mockResolvedValueOnce({ select: () => ({ from: () => ({ limit: async () => [] }) }), execute: async () => ({ rows: ["id", "openId", "clerkUserId", "organizationId", "unitId", "name", "email", "passwordHash", "phone", "role", "loginMethod", "createdAt", "updatedAt", "lastSignedIn"].map(column_name => ({ column_name })) }) });
     const app = createApp();
     registerHealthRoutes(app as any);
     const response = createResponse();

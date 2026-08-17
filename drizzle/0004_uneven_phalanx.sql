@@ -1,0 +1,1 @@
+ALTER TABLE "roleApplications" ADD COLUMN "managerEmail" varchar(320) NOT NULL;

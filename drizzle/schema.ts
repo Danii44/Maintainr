@@ -156,5 +156,36 @@ export const ticketLogs = pgTable("ticketLogs", {
   createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({ ticketLogIdx: index("ticket_logs_ticket_idx").on(table.ticketId, table.createdAt) }));
 
+export const roleApplications = pgTable("roleApplications", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organizationId"),
+  managerEmail: varchar("managerEmail", { length: 320 }).notNull(),
+  requestedRole: roleEnum("requestedRole").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  phone: varchar("phone", { length: 32 }),
+  message: text("message"),
+  status: varchar("status", { length: 24 }).notNull().default("PENDING"),
+  requestedUnitId: integer("requestedUnitId"),
+  reviewedById: integer("reviewedById"),
+  reviewedAt: timestamp("reviewedAt", { withTimezone: true }),
+  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => ({ statusIdx: index("role_applications_status_idx").on(table.status, table.createdAt), emailIdx: index("role_applications_email_idx").on(table.email) }));
+
+export const accountInvitations = pgTable("accountInvitations", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organizationId").notNull(),
+  requestedRole: roleEnum("requestedRole").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  phone: varchar("phone", { length: 32 }),
+  unitId: integer("unitId"),
+  tokenHash: varchar("tokenHash", { length: 64 }).notNull().unique(),
+  expiresAt: timestamp("expiresAt", { withTimezone: true }).notNull(),
+  usedAt: timestamp("usedAt", { withTimezone: true }),
+  createdById: integer("createdById").notNull(),
+  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => ({ emailIdx: index("account_invites_email_idx").on(table.email), expiryIdx: index("account_invites_expiry_idx").on(table.expiresAt) }));
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;

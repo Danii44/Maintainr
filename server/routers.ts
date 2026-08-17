@@ -7,7 +7,8 @@ import { authenticate, register, requestPasswordReset, resetPassword, revokeSess
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { getDb } from "./db";
-import { developerSettings, maintenanceReminders, reminderAcknowledgements, reminderRuns, ticketLogs, ticketMedia, tickets, units, users } from "../drizzle/schema";
+import { acceptInvitation, approveApplication, listApplications, rejectApplication, submitRoleApplication } from "./invitations";
+import { developerSettings, maintenanceReminders, reminderAcknowledgements, reminderRuns, roleApplications, ticketLogs, ticketMedia, tickets, units, users } from "../drizzle/schema";
 import { sendTicketEmail } from "./notifications";
 import { storagePut } from "./storage";
 import { canMutateManagerTicket } from "../shared/managerActionRules";
@@ -44,12 +45,21 @@ export const appRouter = router({
     }),
     requestPasswordReset: publicProcedure.input(z.object({ email: z.string().email() })).mutation(({ input }) => requestPasswordReset(input.email)),
     resetPassword: publicProcedure.input(z.object({ token: z.string().min(20), password: z.string().min(8) })).mutation(({ input }) => resetPassword(input.token, input.password)),
+    acceptInvitation: publicProcedure.input(z.object({ token: z.string().min(20), password: z.string().min(8) })).mutation(async ({ ctx, input }) => {
+      const user = await acceptInvitation(input.token, input.password);
+      const session = await authenticate(user.email ?? "", input.password);
+      ctx.res.cookie(COOKIE_NAME, session.token, { ...sessionCookieOptions(ctx.req), maxAge: Math.floor(ONE_YEAR_MS / 1000) });
+      return session.user;
+    }),
     logout: publicProcedure.mutation(async ({ ctx }) => {
       await revokeSession(await getSessionToken(ctx.req));
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return { success: true } as const;
     }),
+  }),
+  applications: router({
+    submit: publicProcedure.input(z.object({ managerEmail: z.string().email(), requestedRole: z.enum(["TENANT", "TECHNICIAN"]), name: z.string().min(2), email: z.string().email(), phone: z.string().optional(), message: z.string().max(2000).optional() })).mutation(({ input }) => submitRoleApplication(input)),
   }),
   onboarding: router({
     joinUnit: protectedProcedure.input(z.object({ accessCode: z.string().regex(/^\d{6}$/, "Access code must be exactly 6 digits") })).mutation(async ({ ctx, input }) => {
@@ -63,6 +73,9 @@ export const appRouter = router({
     }),
   }),
   manager: router({
+    applications: managerOnly.query(({ ctx }) => listApplications(ctx.user.email ?? "")),
+    approveApplication: managerOnly.input(z.object({ applicationId: z.number().int().positive(), unitId: z.number().int().positive().optional() })).mutation(({ ctx, input }) => approveApplication(input.applicationId, ctx.user, input.unitId)),
+    rejectApplication: managerOnly.input(z.object({ applicationId: z.number().int().positive() })).mutation(({ ctx, input }) => rejectApplication(input.applicationId, ctx.user)),
     createTenant: managerOnly.input(z.object({ name: z.string().min(2), email: z.string().email(), phone: z.string().optional(), unitId: z.number().int().positive() })).mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db || !ctx.user.organizationId) throw new Error(reminderError("database"));

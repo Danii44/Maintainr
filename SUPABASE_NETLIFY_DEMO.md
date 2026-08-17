@@ -6,7 +6,7 @@ Yes, Supabase is suitable for the demo because it provides PostgreSQL. Maintainr
 
 Create a project at [supabase.com](https://supabase.com/). Choose a strong database password and save it in a password manager. In the Supabase dashboard, open **Connect** and copy the **Transaction pooler** connection string for serverless traffic. It normally uses port `6543`. Replace the password placeholder with your database password and set the complete value as Netlify’s `DATABASE_URL`. Supabase recommends transaction pooling for serverless or edge functions; direct connections are better for migrations and long-lived servers.[1]
 
-For a one-time schema import, open Supabase **SQL Editor**, paste the complete contents of `POSTGRESQL_SCHEMA.sql`, and run it. Then confirm that the tables include `organizations`, `users`, `sessions`, `password_reset_tokens`, `maintenance_reminders`, and the remaining application tables. Do not paste the database password into SQL or commit it to Git.
+For a one-time schema import, open Supabase **SQL Editor**, paste the complete contents of `POSTGRESQL_SCHEMA.sql`, and run it. Then confirm that the tables include `organizations`, `users`, `sessions`, `passwordResetTokens`, `roleApplications`, `accountInvitations`, `maintenanceReminders`, and the remaining application tables. Do not paste the database password into SQL or commit it to Git.
 
 ## 2. Create the Netlify demo site
 
@@ -35,7 +35,7 @@ The optional `TWILIO_*` variables can remain unset and `TWILIO_ENABLED=false` fo
 
 ## 4. First login
 
-Deploy the site after saving the variables. Open the deployed Netlify URL and choose **Sign up**. Use the exact email configured as `BOOTSTRAP_MANAGER_EMAIL`; the first matching account is assigned the Manager role. Create other accounts from the application’s onboarding flow and assign or invite them according to the role workflow.
+Deploy the site after saving the variables. Open the deployed Netlify URL and choose **Sign up**. Use the exact email configured as `BOOTSTRAP_MANAGER_EMAIL`; the first matching account is assigned the Manager role. Tenants and Technicians should use `/apply` to enter their own email, their requested role, and the Property Manager’s email. The Manager reviews applications, approves the request, selects a unit for a Tenant when applicable, and Maintainr sends a single-use invitation. The applicant creates their own password at `/invitation?token=...`; never share or email the Manager’s password.
 
 Open `/api/health` to confirm the Function responds. Open `/api/health/database` to confirm the Supabase connection and schema. If the database check fails, copy only the status and non-secret error text; never share `DATABASE_URL` publicly. Test `/forgot-password` only after adding Resend variables and verifying the sender domain.
 
