@@ -1,6 +1,6 @@
 import { and, desc, eq, or } from "drizzle-orm";
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { parse as parseCookie } from "cookie";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { authenticate, register, requestPasswordReset, resetPassword, revokeSession, getSessionToken, sessionCookieOptions, ONE_YEAR_MS } from "./auth";
@@ -12,8 +12,7 @@ import { sendTicketEmail } from "./notifications";
 import { storagePut } from "./storage";
 import { canMutateManagerTicket } from "../shared/managerActionRules";
 import { completionMutationError, statusMutationError } from "../shared/ticketMutationRules";
-import { createHeartbeatJob, deleteHeartbeatJob, updateHeartbeatJob } from "./_core/heartbeat";
-import { canAcknowledgeReminder, cronForReminder, filterRemindersForViewer } from "../shared/reminderRules";
+import { canAcknowledgeReminder, filterRemindersForViewer } from "../shared/reminderRules";
 import { reminderError } from "../shared/reminderErrors";
 
 const category = z.enum(["PLUMBING", "ELECTRICAL", "HVAC", "APPLIANCE", "OTHER"]);
@@ -118,10 +117,9 @@ export const appRouter = router({
       const result = await db.insert(maintenanceReminders).values({ ...input, dueAt, nextRunAt: dueAt, organizationId: ctx.user.organizationId, createdById: ctx.user.id }).returning({ id: maintenanceReminders.id });
       const reminderId = result[0]?.id;
       if (!reminderId) throw new Error(reminderError("database"));
-      const sessionToken = parseCookie(ctx.req.headers.cookie ?? "")[COOKIE_NAME] ?? "";
-      const cron = await createHeartbeatJob({ name: `reminder-${ctx.user.organizationId}-${reminderId}`, cron: cronForReminder(input.cadence, dueAt), path: "/api/scheduled/maintenanceReminder", payload: {}, description: `Maintainr reminder ${reminderId}` }, sessionToken);
-      await db.update(maintenanceReminders).set({ scheduleCronTaskUid: cron.taskUid }).where(eq(maintenanceReminders.id, reminderId));
-      return { success: true, reminderId, nextExecutionAt: cron.nextExecutionAt ?? null };
+      const schedulerUid = `portable-${randomUUID()}`;
+      await db.update(maintenanceReminders).set({ scheduleCronTaskUid: schedulerUid }).where(eq(maintenanceReminders.id, reminderId));
+      return { success: true, reminderId, nextExecutionAt: dueAt.toISOString(), scheduler: "portable" as const };
     }),
     update: managerOnly.input(z.object({ id: reminderIdSchema, title: z.string().min(3).max(255).optional(), description: z.string().min(3).optional(), cadence: z.enum(["ONCE", "DAILY", "WEEKLY", "MONTHLY", "YEARLY"]).optional(), dueAt: z.string().datetime().optional(), isActive: z.boolean().optional() })).mutation(async ({ ctx, input }) => {
       const db = await getDb();
@@ -131,10 +129,6 @@ export const appRouter = router({
       const dueAt = input.dueAt ? new Date(input.dueAt) : current.dueAt;
       const patch = { ...input, id: undefined, dueAt, nextRunAt: dueAt };
       await db.update(maintenanceReminders).set(patch).where(eq(maintenanceReminders.id, input.id));
-      if (current.scheduleCronTaskUid) {
-        const sessionToken = parseCookie(ctx.req.headers.cookie ?? "")[COOKIE_NAME] ?? "";
-        await updateHeartbeatJob(current.scheduleCronTaskUid, { cron: cronForReminder(input.cadence ?? current.cadence, dueAt), enable: input.isActive }, sessionToken);
-      }
       return { success: true };
     }),
     remove: managerOnly.input(z.object({ id: reminderIdSchema })).mutation(async ({ ctx, input }) => {
@@ -142,10 +136,6 @@ export const appRouter = router({
       if (!db || !ctx.user.organizationId) throw new Error(reminderError("database"));
       const current = (await db.select().from(maintenanceReminders).where(and(eq(maintenanceReminders.id, input.id), eq(maintenanceReminders.organizationId, ctx.user.organizationId))).limit(1))[0];
       if (!current) throw new Error(reminderError("notFound"));
-      if (current.scheduleCronTaskUid) {
-        const sessionToken = parseCookie(ctx.req.headers.cookie ?? "")[COOKIE_NAME] ?? "";
-        await deleteHeartbeatJob(current.scheduleCronTaskUid, sessionToken);
-      }
       await db.delete(maintenanceReminders).where(eq(maintenanceReminders.id, input.id));
       return { success: true };
     }),

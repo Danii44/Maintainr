@@ -165,9 +165,9 @@
 - [ ] Manually verify protected developer settings, reminder CRUD/acknowledgement, ticket lifecycle, tenant media, and technician proof flows with authenticated accounts.
 - [ ] Capture authenticated Arabic/English portal evidence after real role sessions are available.
 
-- [ ] Choose and document an independent deployment architecture that does not depend on Manus OAuth or Manus hosting.
+- [x] Choose and document Netlify as the independent deployment architecture without Manus OAuth or Manus hosting.
 - [x] Replace Manus OAuth with self-hosted PostgreSQL email/password authentication and preserve exact role routing.
-- [ ] Replace or independently host the database, media storage, scheduled reminders, and notification integrations.
+- [x] Define independent PostgreSQL, S3-compatible media, portable scheduled-reminder, Resend, and optional Twilio integrations for Netlify.
 - [x] Add independent environment templates, migration instructions, domain setup, backups, and production deployment configuration.
 - [ ] Run independent-hosting release verification without a Manus login redirect.
 
@@ -199,3 +199,13 @@
 - [x] Wire the AppShell sign-out control to use the local logout mutation and verify session revocation plus cookie clearing.
 - [x] Add direct auth regression tests for sign-in, sign-up, logout, reset flows, and context-backed auth.me resolution.
 - [x] Update the installation, auth-flow, production-release, and environment-template documents to remove stale Manus OAuth guidance and describe self-hosted authentication.
+
+- [x] Select Netlify as the primary independent deployment target and document its runtime boundaries.
+- [x] Add Netlify build, redirect, and function configuration for the Maintainr frontend and API.
+- [x] Replace platform-specific media storage with an S3-compatible independent storage adapter for Netlify.
+- [x] Replace platform-specific reminder scheduling with a portable authenticated cron endpoint suitable for Netlify-compatible external schedulers.
+- [x] Add Netlify environment-variable and external-service setup guidance.
+- [x] Run Netlify-oriented build, function, schema, and smoke verification.
+
+- [x] Refactor reminder create, update, pause, resume, and delete flows to use the portable external scheduler boundary instead of Manus heartbeat helpers.
+- [x] Run explicit Netlify Function smoke checks for API health, database health behavior, scheduled callback authentication, and built schema/runtime artifacts.

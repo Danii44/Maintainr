@@ -1,0 +1,5 @@
+# Netlify Deployment Research Notes
+
+Netlify’s official Vite guidance is available at https://docs.netlify.com/build/frameworks/framework-setup-guides/vite/. Netlify documents environment variables for Functions at https://docs.netlify.com/build/functions/environment-variables/ and general environment-variable management at https://docs.netlify.com/build/environment-variables/overview/. Netlify Scheduled Functions are documented at https://docs.netlify.com/build/functions/scheduled-functions/ and the general Functions overview is at https://docs.netlify.com/build/functions/overview/.
+
+Relevant implementation implications: the Vite frontend can be built as a Netlify site; server-side secrets must be configured in Netlify’s environment-variable system and are available to Functions; scheduled reminder execution can be represented as a Netlify Scheduled Function rather than an in-process timer; and the current Express server cannot be assumed to run as a long-lived process inside Netlify’s static hosting path, so the API needs a serverless adapter or a separately hosted Node API.

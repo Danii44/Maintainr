@@ -7,7 +7,7 @@ import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
-import { handleMaintenanceReminder } from "../reminderScheduler";
+import { handleMaintenanceReminder, handlePortableMaintenanceReminder } from "../reminderScheduler";
 import { registerHealthRoutes } from "../health";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -29,7 +29,7 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
   throw new Error(`No available port found starting from ${startPort}`);
 }
 
-async function startServer() {
+export async function createApp(options: { includeStatic?: boolean } = {}) {
   const app = express();
   const server = createServer(app);
   // Configure body parser with larger size limit for file uploads
@@ -38,6 +38,7 @@ async function startServer() {
   registerStorageProxy(app);
   registerHealthRoutes(app);
   app.post("/api/scheduled/maintenanceReminder", handleMaintenanceReminder);
+  app.post("/api/scheduled/portableMaintenanceReminder", handlePortableMaintenanceReminder);
   // tRPC API
   app.use(
     "/api/trpc",
@@ -46,13 +47,17 @@ async function startServer() {
       createContext,
     })
   );
-  // development mode uses Vite, production mode uses static files
-  if (process.env.NODE_ENV === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
+  if (options.includeStatic !== false) {
+    // development mode uses Vite, production mode uses static files
+    if (process.env.NODE_ENV === "development") await setupVite(app, server);
+    else serveStatic(app);
   }
 
+  return { app, server };
+}
+
+async function startServer() {
+  const { server } = await createApp();
   const preferredPort = parseInt(process.env.PORT || "3000");
   const port = await findAvailablePort(preferredPort);
 
@@ -65,4 +70,4 @@ async function startServer() {
   });
 }
 
-startServer().catch(console.error);
+if (process.env.NETLIFY !== "true" && process.env.SERVERLESS_FUNCTION !== "true") startServer().catch(console.error);

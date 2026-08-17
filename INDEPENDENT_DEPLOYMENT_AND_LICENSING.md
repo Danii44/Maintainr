@@ -6,6 +6,12 @@ Maintainr can be deployed to **Vercel, Netlify, or cPanel**, but the backend mus
 
 The safest independent release architecture is a Node.js-capable host plus a managed PostgreSQL database, S3-compatible object storage, self-hosted PostgreSQL email/password authentication, Resend for email, optional Twilio for SMS, and a scheduled worker or cron endpoint. The private release now uses the local authentication boundary; storage and scheduled-worker adapters remain separate deployment decisions.
 
+## Netlify target architecture
+
+For the selected private deployment, Netlify hosts the Vite frontend and serverless API Functions. PostgreSQL is external, media bytes are stored in an S3-compatible bucket, and recurring reminders run through `netlify/functions/scheduled-maintenanceReminder.ts`. The repository includes `netlify.toml`, `NETLIFY_DEPLOYMENT.md`, and the `S3_*` environment template. Netlify’s official Vite, Functions, environment-variable, and Scheduled Functions references are listed in the dedicated deployment guide.
+
+Netlify is not a long-lived Node process. The Express server remains the local development and cPanel-compatible entrypoint, while Netlify receives `/api/*` through `netlify/functions/api.ts`. Do not use an in-process timer or local filesystem for persistent data.
+
 ## Platform comparison
 
 | Platform | Suitable role | Where the PostgreSQL password goes | Important limitation |
