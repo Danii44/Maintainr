@@ -76,6 +76,7 @@ export const appRouter = router({
     applications: managerOnly.query(({ ctx }) => listApplications(ctx.user.email ?? "")),
     approveApplication: managerOnly.input(z.object({ applicationId: z.number().int().positive(), unitId: z.number().int().positive().optional() })).mutation(({ ctx, input }) => approveApplication(input.applicationId, ctx.user, input.unitId)),
     rejectApplication: managerOnly.input(z.object({ applicationId: z.number().int().positive() })).mutation(({ ctx, input }) => rejectApplication(input.applicationId, ctx.user)),
+    sendPasswordReset: managerOnly.input(z.object({ email: z.string().email() })).mutation(({ input }) => requestPasswordReset(input.email)),
     createTenant: managerOnly.input(z.object({ name: z.string().min(2), email: z.string().email(), phone: z.string().optional(), unitId: z.number().int().positive() })).mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db || !ctx.user.organizationId) throw new Error(reminderError("database"));

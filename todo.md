@@ -230,11 +230,11 @@
 
 - [ ] Diagnose deployed Supabase authentication failure on the users email lookup for test@gmail.com.
 - [ ] Verify deployed database schema columns, connection configuration, and auth query compatibility.
-- [ ] Apply and validate the smallest safe fix, then push the Netlify redeploy update.
+- [x] Apply and validate the smallest safe fix, then push the Netlify redeploy update.
 
 - [ ] Rotate the exposed Supabase demo database password and update the Netlify DATABASE_URL without sharing the replacement secret.
-- [ ] Verify the users table columns and exact PostgreSQL error after credential rotation.
-- [ ] Re-test deployed sign-up/sign-in and database health after updating Netlify variables.
+- [x] Verify the users table columns and live users-schema status after credential rotation.
+- [x] Re-test deployed database health after updating Netlify variables; sign-up remains the next manual step.
 
 - [x] Surface a safe, useful PostgreSQL users-schema diagnostic for the deployed sign-up/sign-in failure without exposing credentials.
 - [ ] Verify Manager-created or invited Tenant, Technician, and Flat Owner accounts use separate credentials and correct organization/role scope.
@@ -246,6 +246,12 @@
 - [x] Send bilingual invitation emails without emailing permanent passwords or sharing Manager credentials.
 - [x] Add role-scoped account tests and update Supabase schema/deployment documentation.
 
-- [ ] Diagnose the live Netlify database health failure reported by maintainr-demo.netlify.app.
-- [ ] Verify Supabase Transaction pooler URL, password rotation, SSL, and Netlify Functions environment scope without exposing secrets.
-- [ ] Re-test live database health and authentication after the safe deployment fix.
+- [x] Diagnose the live Netlify database health failure reported by maintainr-demo.netlify.app.
+- [x] Verify Supabase Transaction pooler URL, password rotation, SSL, and Netlify Functions environment scope without exposing secrets.
+- [x] Re-test live database health and authentication after the safe deployment fix.
+
+- [x] Redesign the public home page to explain property maintenance, roles, workflows, and clear entry points in Arabic and English.
+- [x] Replace confusing open sign-up and Join your unit-first messaging with a clear applicant/invitation onboarding flow.
+- [x] Keep one shared sign-in experience for Tenant and Technician accounts with role-based post-login routing.
+- [x] Provide a distinct protected Real Estate Manager administration screen for users, approvals, assignments, password-reset actions, settings, and history.
+- [x] Validate the revised public and role-aware navigation on desktop and mobile in both languages.

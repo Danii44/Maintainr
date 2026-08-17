@@ -134,15 +134,17 @@ export async function register(email: string, password: string, name: string) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable / قاعدة البيانات غير متاحة");
   const passwordHash = await hashPassword(password);
+  const bootstrapEmail = process.env.BOOTSTRAP_MANAGER_EMAIL?.trim().toLowerCase();
+  const isBootstrapManager = Boolean(bootstrapEmail && normalizedEmail === bootstrapEmail);
   const existing = (await db.select().from(users).where(eq(users.email, normalizedEmail)).limit(1))[0];
   let user: User;
   if (existing?.passwordHash) throw new Error("An account already exists / يوجد حساب بالفعل");
+  if (!existing && !isBootstrapManager) throw new Error("Public sign-up is only for the property manager setup. Apply for access instead / التسجيل العام متاح فقط لإعداد مدير العقار. استخدم طلب الوصول بدلاً من ذلك");
   if (existing) {
-    const result = await db.update(users).set({ name, passwordHash, loginMethod: "password", updatedAt: new Date(), lastSignedIn: new Date() }).where(eq(users.id, existing.id)).returning();
+    const result = await db.update(users).set({ name, passwordHash, loginMethod: "password", role: isBootstrapManager ? "PROPERTY_MANAGER" : existing.role, updatedAt: new Date(), lastSignedIn: new Date() }).where(eq(users.id, existing.id)).returning();
     user = result[0];
   } else {
-    const bootstrapEmail = process.env.BOOTSTRAP_MANAGER_EMAIL?.trim().toLowerCase();
-    const result = await db.insert(users).values({ openId: `local_${randomUUID()}`, email: normalizedEmail, name, passwordHash, loginMethod: "password", role: bootstrapEmail && normalizedEmail === bootstrapEmail ? "PROPERTY_MANAGER" : "TENANT" }).returning();
+    const result = await db.insert(users).values({ openId: `local_${randomUUID()}`, email: normalizedEmail, name, passwordHash, loginMethod: "password", role: "PROPERTY_MANAGER" }).returning();
     user = result[0];
   }
   const session = await createSession(user.id);
