@@ -278,3 +278,7 @@
 - [ ] Verify cross-role synchronization for users, units, tickets, assignments, reminders, media, audit history, and automatic role routing.
 - [ ] Add or update regression coverage for repaired mobile and role workflow behavior.
 - [ ] Complete responsive screenshots and authenticated role QA for the four demo accounts.
+- [x] Remove duplicate sign-in prompts from the public home flow while keeping one shared role-aware login.
+- [x] Remove visible demo-only statistics, fake activity, fixed names, and seeded marketing values from production UI without deleting login accounts.
+- [x] Simplify dashboards with clear live-data summaries, empty states, and easy role-specific actions.
+- [ ] Verify all four role workflows and cross-role synchronization after the cleanup.

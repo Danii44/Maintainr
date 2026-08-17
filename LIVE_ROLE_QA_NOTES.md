@@ -7,3 +7,9 @@ The deployed `https://maintainr-demo.netlify.app` accepted the seeded Manager cr
 The deployed Manager page showed the older UI: the public home page still displayed a separate `Manager administration` button, and the Manager portal still displayed `New ticket` and the unused slider-control button. These are absent or repaired in the current local project changes, so the deployed site has not yet received the latest checkpoint/build.
 
 The live Manager portal loaded the seeded demo ticket `MT-1` and showed Manager navigation, account access, ticket filters, assignment, and priority controls. Authenticated Tenant, Technician, and Flat Owner live QA remains pending because the Manager session was signed out before those sessions were tested.
+
+## Latest deployed home check
+
+URL checked: https://maintainr-demo.netlify.app/
+
+The current deployed version still shows `Sign in`, `Apply for access`, a separate `Manager administration` button in the header, a second `Manager administration` hero action, and a separate `Sign in to your portal` hero action. It also still displays fixed marketing/demo values: `4 role-based portals`, `100% ticket traceability`, `24/7 visibility`, `98.4% SLA`, and fixed feature-card copy. This confirms the cleaned local checkpoint has not reached the deployed site yet.
