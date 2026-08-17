@@ -2,7 +2,7 @@ import { createHash, randomBytes, randomUUID, scrypt as scryptCallback, timingSa
 import { promisify } from "node:util";
 import type { Request } from "express";
 import { parse as parseCookie } from "cookie";
-import { eq, and, gt, isNull } from "drizzle-orm";
+import { eq, and, gt, isNull, ne } from "drizzle-orm";
 import { users, sessions, passwordResetTokens, type User } from "../drizzle/schema";
 import { sendTicketEmail } from "./notifications";
 import { getDb } from "./db";
@@ -101,6 +101,28 @@ export async function authenticate(email: string, password: string) {
   }
   const session = await createSession(row.id);
   return { user: row, ...session };
+}
+
+export async function updateProfile(userId: number, input: { name: string; phone?: string; avatarUrl?: string | null }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable / قاعدة البيانات غير متاحة");
+  const updated = (await db.update(users).set({ name: input.name.trim(), phone: input.phone?.trim() || null, avatarUrl: input.avatarUrl || null, updatedAt: new Date() }).where(eq(users.id, userId)).returning())[0];
+  if (!updated) throw new Error("User profile not found / ملف المستخدم غير موجود");
+  const { passwordHash: _passwordHash, ...safeUser } = updated;
+  return safeUser;
+}
+
+export async function changePassword(userId: number, currentPassword: string, nextPassword: string, currentToken?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable / قاعدة البيانات غير متاحة");
+  const user = (await db.select().from(users).where(eq(users.id, userId)).limit(1))[0];
+  if (!user?.passwordHash || !(await verifyPassword(currentPassword, user.passwordHash))) throw new Error("Current password is incorrect / كلمة المرور الحالية غير صحيحة");
+  const passwordHash = await hashPassword(nextPassword);
+  await db.update(users).set({ passwordHash, loginMethod: "password", updatedAt: new Date() }).where(eq(users.id, userId));
+  const sessionFilters = [eq(sessions.userId, userId), isNull(sessions.revokedAt)];
+  if (currentToken) sessionFilters.push(ne(sessions.tokenHash, hashToken(currentToken)));
+  await db.update(sessions).set({ revokedAt: new Date() }).where(and(...sessionFilters));
+  return { success: true } as const;
 }
 
 export async function requestPasswordReset(email: string) {

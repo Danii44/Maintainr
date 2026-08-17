@@ -146,7 +146,7 @@ describe("ticket mutation procedures", () => {
     await expect(managerCaller.settings.update({ projectName: "Maintainr Pro", projectNameArabic: "مينتنر برو", logoUrl: "", primaryColor: "#8B5CF6", accentColor: "#22D3EE", emailNotificationsEnabled: true, smsNotificationsEnabled: false })).resolves.toEqual({ success: true });
     expect(db.inserts.at(-1)).toMatchObject({ value: expect.objectContaining({ projectNameArabic: "مينتنر برو", emailNotificationsEnabled: true }) });
     const tenantCaller = appRouter.createCaller(createContext("TENANT"));
-    await expect(tenantCaller.settings.get()).rejects.toThrow();
+    await expect(tenantCaller.settings.get()).resolves.toMatchObject({ projectName: "Maintainr", projectNameArabic: "مينتنر" });
     await expect(tenantCaller.settings.update({ projectName: "Nope", projectNameArabic: "لا", logoUrl: "", primaryColor: "#8B5CF6", accentColor: "#22D3EE", emailNotificationsEnabled: false, smsNotificationsEnabled: false })).rejects.toThrow("Manager role required / يلزم دور مدير العقار");
   });
 

@@ -7,6 +7,8 @@ const authMocks = vi.hoisted(() => ({
   register: vi.fn(),
   requestPasswordReset: vi.fn(),
   resetPassword: vi.fn(),
+  updateProfile: vi.fn(),
+  changePassword: vi.fn(),
   revokeSession: vi.fn(),
   getSessionToken: vi.fn(),
   sessionCookieOptions: vi.fn(() => ({ httpOnly: true, sameSite: "lax", secure: true, path: "/" })),
@@ -40,6 +42,17 @@ describe("local auth router", () => {
     const result = await appRouter.createCaller(ctx).auth.signUp({ name: "Local User", email: "local@example.com", password: "password123" });
     expect(result.role).toBe("PROPERTY_MANAGER");
     expect(authMocks.register).toHaveBeenCalledWith("local@example.com", "password123", "Local User");
+  });
+
+  it("updates the authenticated profile and changes its password through protected procedures", async () => {
+    authMocks.updateProfile.mockResolvedValue({ ...user, name: "Updated User", avatarUrl: "https://cdn.example/avatar.png" });
+    authMocks.changePassword.mockResolvedValue({ success: true });
+    const { ctx } = context(); ctx.user = user;
+    const caller = appRouter.createCaller(ctx);
+    await expect(caller.auth.updateProfile({ name: "Updated User", phone: "+123456789", avatarUrl: "https://cdn.example/avatar.png" })).resolves.toMatchObject({ name: "Updated User" });
+    await expect(caller.auth.changePassword({ currentPassword: "password123", nextPassword: "newpassword123" })).resolves.toEqual({ success: true });
+    expect(authMocks.updateProfile).toHaveBeenCalledWith(user.id, { name: "Updated User", phone: "+123456789", avatarUrl: "https://cdn.example/avatar.png" });
+    expect(authMocks.changePassword).toHaveBeenCalledWith(user.id, "password123", "newpassword123", undefined);
   });
 
   it("returns the authenticated context user through auth.me", async () => {

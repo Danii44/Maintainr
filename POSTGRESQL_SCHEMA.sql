@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS "users" (
   "email" varchar(320),
   "passwordHash" text,
   "phone" varchar(32),
+  "avatarUrl" text,
   "role" "role" NOT NULL DEFAULT 'TENANT',
   "loginMethod" varchar(64),
   "createdAt" timestamptz NOT NULL DEFAULT now(),

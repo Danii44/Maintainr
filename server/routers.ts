@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
-import { authenticate, register, requestPasswordReset, resetPassword, revokeSession, getSessionToken, sessionCookieOptions, ONE_YEAR_MS } from "./auth";
+import { authenticate, register, requestPasswordReset, resetPassword, updateProfile, changePassword, revokeSession, getSessionToken, sessionCookieOptions, ONE_YEAR_MS } from "./auth";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { getDb } from "./db";
@@ -45,6 +45,8 @@ export const appRouter = router({
     }),
     requestPasswordReset: publicProcedure.input(z.object({ email: z.string().email() })).mutation(({ input }) => requestPasswordReset(input.email)),
     resetPassword: publicProcedure.input(z.object({ token: z.string().min(20), password: z.string().min(8) })).mutation(({ input }) => resetPassword(input.token, input.password)),
+    updateProfile: protectedProcedure.input(z.object({ name: z.string().min(2).max(255), phone: z.string().max(32).optional(), avatarUrl: z.string().url().optional().or(z.literal("")) })).mutation(({ ctx, input }) => updateProfile(ctx.user.id, input)),
+    changePassword: protectedProcedure.input(z.object({ currentPassword: z.string().min(8), nextPassword: z.string().min(8) })).mutation(async ({ ctx, input }) => changePassword(ctx.user.id, input.currentPassword, input.nextPassword, await getSessionToken(ctx.req))),
     acceptInvitation: publicProcedure.input(z.object({ token: z.string().min(20), password: z.string().min(8) })).mutation(async ({ ctx, input }) => {
       const user = await acceptInvitation(input.token, input.password);
       const session = await authenticate(user.email ?? "", input.password);
@@ -155,7 +157,7 @@ export const appRouter = router({
     }),
   }),
   settings: router({
-    get: managerOnly.query(async ({ ctx }) => {
+    get: protectedProcedure.query(async ({ ctx }) => {
       const db = await getDb();
       if (!db || !ctx.user.organizationId) return null;
       const current = (await db.select().from(developerSettings).where(eq(developerSettings.organizationId, ctx.user.organizationId)).limit(1))[0];
