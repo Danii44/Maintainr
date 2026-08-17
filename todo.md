@@ -324,3 +324,6 @@
 - [x] Add controlled demo session creation, labelled sample operational records, and explicit blocking of production queries, provider messages, exports, and webhooks.
 - [x] Add deterministic expiry, rate-limit, and cleanup routines for demo sessions and demo media, with public registration disabled until deployment validation.
 - [x] Validate that demo-only configuration, sample records, and cleanup behavior cannot access or alter production organization data.
+
+- [x] Clarify the public difference between interactive demo access, a new private customer workspace, and existing-customer sign-in in English and Arabic.
+- [x] Reorder public calls to action so the demo is primary, workspace creation is clearly a private real SaaS account, and sign-in is secondary for existing users.
