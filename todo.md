@@ -270,3 +270,4 @@
 - [ ] Complete authenticated release QA for Manager, Tenant, Technician, and Flat Owner accounts on the deployed Netlify site.
 - [ ] Create the final distributable checkpoint and provide Publish-action handoff instructions.
 
+- [x] Add and validate a Supabase PostgreSQL seed query for separate Manager, Tenant, Technician, and Flat Owner demo accounts with portal QA data.
