@@ -209,3 +209,13 @@
 
 - [x] Refactor reminder create, update, pause, resume, and delete flows to use the portable external scheduler boundary instead of Manus heartbeat helpers.
 - [x] Run explicit Netlify Function smoke checks for API health, database health behavior, scheduled callback authentication, and built schema/runtime artifacts.
+
+- [x] Use Supabase PostgreSQL as the documented demo database option for Maintainr.
+- [x] Add a provider-specific Supabase-to-Netlify demo setup walkthrough for all required environment variables.
+- [x] Explain safe demo publishing and first-login verification without requiring purchase-code licensing.
+
+- [ ] Prepare a public-safe GitHub export for Danii44/Maintainr.git.
+- [ ] Scan tracked and candidate files for secrets, private tokens, generated output, logs, and local deployment artifacts.
+- [ ] Add public-repository metadata and exclude secrets and generated artifacts from the upload.
+- [ ] Push the sanitized project to the authorized public GitHub repository.
+- [ ] Verify the public repository remote and uploaded contents.
