@@ -145,3 +145,15 @@
 
 - [x] Localize reminders.update, reminders.remove, and reminders.acknowledge invalid-ID validation errors with bilingual contracts.
 - [x] Add direct tests for invalid reminder update/remove/acknowledge inputs and verify no default English-only reminder error remains.
+
+- [ ] Create a production release checklist covering deployment, domain, provider configuration, backups, security, onboarding, and support operations.
+- [ ] Add production configuration guidance for Resend email, optional Twilio SMS, scheduled callbacks, branding, and required environment values.
+- [ ] Add first-run organization onboarding guidance for creating properties, units, roles, invitations, and six-digit unit access codes.
+- [ ] Add production-safe error handling, audit visibility, and recovery guidance for scheduled reminders and notification failures.
+- [ ] Verify all role-specific routes, protected settings, reminder permissions, ticket lifecycle rules, media uploads, and Arabic/English flows for release readiness.
+- [ ] Create the final distributable checkpoint and handoff instructions; publishing must be completed through the project Publish action.
+
+- [x] Research official setup URLs for Resend, Twilio, Firebase, and production domain/publishing configuration.
+- [x] Write a complete Maintainr installation guide with account creation, key retrieval, secret placement, notification setup, Firebase optional setup, and release verification.
+- [x] Generate and validate a PDF copy of the installation guide.
+- [x] Attach the guide files for the user and record the documentation checkpoint.
