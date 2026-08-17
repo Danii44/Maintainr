@@ -273,3 +273,8 @@
 - [x] Add and validate a Supabase PostgreSQL seed query for separate Manager, Tenant, Technician, and Flat Owner demo accounts with portal QA data.
 - [x] Remove the separate Manager administration public entry point and use one shared role-aware Sign in action with automatic post-login routing.
 - [x] Verify the simplified navigation visually and with role-routing regression coverage.
+- [ ] Rework Manager, Tenant, Technician, and Flat Owner portal layouts for mobile-first use with touch-friendly controls and no horizontal overflow.
+- [ ] Audit all visible portal buttons and actions for working handlers, loading states, errors, and role-appropriate permissions.
+- [ ] Verify cross-role synchronization for users, units, tickets, assignments, reminders, media, audit history, and automatic role routing.
+- [ ] Add or update regression coverage for repaired mobile and role workflow behavior.
+- [ ] Complete responsive screenshots and authenticated role QA for the four demo accounts.
