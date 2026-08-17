@@ -178,3 +178,10 @@
 - [x] Remove unused Firebase/legacy configuration and files only after confirming no active code or documentation depends on them.
 - [x] Document the remaining independent-auth and deployment migration boundary so no Manus OAuth redirect is mistaken for a standalone release.
 - [x] Run PostgreSQL schema/query tests, TypeScript validation, and the full regression suite before saving a migration checkpoint.
+
+- [x] Research official Netlify, Vercel, and cPanel deployment/environment-variable guidance.
+- [x] Document PostgreSQL password and secret placement for each supported deployment platform.
+- [x] Add database connection and schema-health checks with safe diagnostics that never reveal passwords.
+- [x] Design and document an Envato-style license activation boundary without placing a license secret in frontend code.
+- [x] Write a platform comparison and complete independent installation guide with deployment, database, auth, storage, reminders, backups, and licensing steps.
+- [x] Validate the guide and save a distributable documentation checkpoint.
