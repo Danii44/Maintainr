@@ -306,3 +306,8 @@
 - [x] Add a one-time bilingual workspace setup checklist for branding, first property, and unit setup without exposing provider secrets.
 - [x] Replace the bootstrap-email-only public registration restriction with safe, rate-limited workspace registration while preserving invitation-only participant accounts.
 - [x] Add direct tests for duplicate workspace creator email, cross-organization data isolation, Manager ownership, and invitation scoping.
+
+- [x] Define Maintainr’s professional commercial model across guided demo, self-service SaaS, and separately licensed deployment options.
+- [x] Design a safe demo journey that showcases realistic workflows without exposing one customer workspace to another.
+- [x] Define product packaging, feature tiers, demo data boundaries, and conversion points for real-estate companies.
+- [x] Produce a phased product-readiness roadmap covering product, operations, security, support, billing, and deployment requirements.
