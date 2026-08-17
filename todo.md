@@ -146,14 +146,35 @@
 - [x] Localize reminders.update, reminders.remove, and reminders.acknowledge invalid-ID validation errors with bilingual contracts.
 - [x] Add direct tests for invalid reminder update/remove/acknowledge inputs and verify no default English-only reminder error remains.
 
-- [ ] Create a production release checklist covering deployment, domain, provider configuration, backups, security, onboarding, and support operations.
-- [ ] Add production configuration guidance for Resend email, optional Twilio SMS, scheduled callbacks, branding, and required environment values.
-- [ ] Add first-run organization onboarding guidance for creating properties, units, roles, invitations, and six-digit unit access codes.
-- [ ] Add production-safe error handling, audit visibility, and recovery guidance for scheduled reminders and notification failures.
-- [ ] Verify all role-specific routes, protected settings, reminder permissions, ticket lifecycle rules, media uploads, and Arabic/English flows for release readiness.
+- [x] Create a production release checklist covering deployment, domain, provider configuration, backups, security, onboarding, and support operations.
+- [x] Add production configuration guidance for Resend email, optional Twilio SMS, scheduled callbacks, branding, and required environment values.
+- [x] Add first-run organization onboarding guidance for creating properties, units, roles, invitations, and six-digit unit access codes.
+- [x] Add production-safe error handling, audit visibility, and recovery guidance for scheduled reminders and notification failures.
+- [x] Verify all role-specific routes, protected settings, reminder permissions, ticket lifecycle rules, media uploads, and Arabic/English flows for release readiness.
 - [ ] Create the final distributable checkpoint and handoff instructions; publishing must be completed through the project Publish action.
 
 - [x] Research official setup URLs for Resend, Twilio, Firebase, and production domain/publishing configuration.
 - [x] Write a complete Maintainr installation guide with account creation, key retrieval, secret placement, notification setup, Firebase optional setup, and release verification.
 - [x] Generate and validate a PDF copy of the installation guide.
 - [x] Attach the guide files for the user and record the documentation checkpoint.
+
+- [x] Run and document a release-readiness verification pass across all public, onboarding, role portals, protected settings, reminders, ticket lifecycle, media, and bilingual flows.
+- [x] Capture release verification evidence in RELEASE_VERIFICATION.md, including automated test results and authenticated-session limitations.
+
+- [ ] Run authenticated release QA for PROPERTY_MANAGER, TENANT, TECHNICIAN, and FLAT_OWNER across their protected routes.
+- [ ] Manually verify protected developer settings, reminder CRUD/acknowledgement, ticket lifecycle, tenant media, and technician proof flows with authenticated accounts.
+- [ ] Capture authenticated Arabic/English portal evidence after real role sessions are available.
+
+- [ ] Choose and document an independent deployment architecture that does not depend on Manus OAuth or Manus hosting.
+- [ ] Replace Manus OAuth with the selected independent authentication provider and preserve exact role routing.
+- [ ] Replace or independently host the database, media storage, scheduled reminders, and notification integrations.
+- [ ] Add independent environment templates, migration instructions, domain setup, backups, and production deployment configuration.
+- [ ] Run independent-hosting release verification without a Manus login redirect.
+
+- [ ] Audit all MySQL-specific schema builders, Drizzle configuration, migrations, query operators, and environment references.
+- [ ] Convert the active schema and Drizzle configuration to PostgreSQL without removing required business tables or role fields.
+- [ ] Generate one standalone PostgreSQL SQL import file with tables, enums, indexes, foreign keys, defaults, and safe idempotent setup.
+- [ ] Convert server queries and database helpers to PostgreSQL-compatible behavior and document the required DATABASE_URL.
+- [ ] Remove unused Firebase/legacy configuration and files only after confirming no active code or documentation depends on them.
+- [ ] Document the remaining independent-auth and deployment migration boundary so no Manus OAuth redirect is mistaken for a standalone release.
+- [ ] Run PostgreSQL schema/query tests, TypeScript validation, and the full regression suite before saving a migration checkpoint.

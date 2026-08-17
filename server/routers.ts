@@ -54,17 +54,17 @@ export const appRouter = router({
       const db = await getDb();
       if (!db || !ctx.user.organizationId) throw new Error(reminderError("database"));
       const openId = `invited_${crypto.randomUUID()}`;
-      const result = await db.insert(users).values({ openId, organizationId: ctx.user.organizationId, unitId: input.unitId, name: input.name, email: input.email, phone: input.phone, role: "TENANT", loginMethod: "invitation" });
+      const result = await db.insert(users).values({ openId, organizationId: ctx.user.organizationId, unitId: input.unitId, name: input.name, email: input.email, phone: input.phone, role: "TENANT", loginMethod: "invitation" }).returning({ id: users.id });
       await sendTicketEmail({ event: "TICKET_CREATED", recipientEmail: input.email, subject: "Your Maintainr resident invitation", text: `Hello ${input.name}, your property manager has invited you to Maintainr. Use the /join-unit flow after signing in.` });
-      return { success: true, userId: Number(result[0].insertId) };
+      return { success: true, userId: result[0]?.id ?? null };
     }),
     inviteTechnician: managerOnly.input(z.object({ name: z.string().min(2), email: z.string().email(), phone: z.string().optional() })).mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db || !ctx.user.organizationId) throw new Error(reminderError("database"));
       const openId = `invited_${crypto.randomUUID()}`;
-      const result = await db.insert(users).values({ openId, organizationId: ctx.user.organizationId, name: input.name, email: input.email, phone: input.phone, role: "TECHNICIAN", loginMethod: "invitation" });
+      const result = await db.insert(users).values({ openId, organizationId: ctx.user.organizationId, name: input.name, email: input.email, phone: input.phone, role: "TECHNICIAN", loginMethod: "invitation" }).returning({ id: users.id });
       await sendTicketEmail({ event: "TICKET_ASSIGNED", recipientEmail: input.email, subject: "You have been invited as a Maintainr technician", text: `Hello ${input.name}, your field technician invitation is ready. Sign in to access assigned jobs.` });
-      return { success: true, userId: Number(result[0].insertId) };
+      return { success: true, userId: result[0]?.id ?? null };
     }),
     listTechnicians: managerOnly.query(async ({ ctx }) => { const db = await getDb(); if (!db || !ctx.user.organizationId) throw new Error(reminderError("database")); return db.select({ id: users.id, name: users.name, email: users.email }).from(users).where(and(eq(users.organizationId, ctx.user.organizationId), eq(users.role, "TECHNICIAN"))); }),
     generateUnitCode: managerOnly.input(z.object({ unitId: z.number().int().positive() })).mutation(async ({ input }) => {
@@ -94,15 +94,16 @@ export const appRouter = router({
       if (!reminder) throw new Error(reminderError("notFound"));
       const allowed = canAcknowledgeReminder({ role: ctx.user.role as "PROPERTY_MANAGER" | "TENANT" | "TECHNICIAN" | "FLAT_OWNER", actorId: ctx.user.id, actorUnitId: ctx.user.unitId, reminderOrganizationId: reminder.organizationId, actorOrganizationId: ctx.user.organizationId, reminderUnitId: reminder.unitId, assignedToId: reminder.assignedToId });
       if (!allowed) throw new Error(reminderError("unauthorized"));
-      await db.insert(reminderAcknowledgements).values({ reminderId: input.reminderId, userId: ctx.user.id }).onDuplicateKeyUpdate({ set: { acknowledgedAt: new Date() } });
+      await db.insert(reminderAcknowledgements).values({ reminderId: input.reminderId, userId: ctx.user.id }).onConflictDoUpdate({ target: [reminderAcknowledgements.reminderId, reminderAcknowledgements.userId], set: { acknowledgedAt: new Date() } });
       return { success: true };
     }),
     create: managerOnly.input(z.object({ title: z.string().min(3, "Reminder title is required / عنوان التذكير مطلوب").max(255), description: z.string().min(3, "Reminder description is required / وصف التذكير مطلوب"), propertyId: z.number().int().positive().optional(), unitId: z.number().int().positive().optional(), assignedToId: z.number().int().positive().optional(), cadence: z.enum(["ONCE", "DAILY", "WEEKLY", "MONTHLY", "YEARLY"]).default("ONCE"), dueAt: z.string().datetime({ message: "Reminder date is invalid / تاريخ التذكير غير صالح" }) })).mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db || !ctx.user.organizationId) throw new Error(reminderError("database"));
       const dueAt = new Date(input.dueAt);
-      const result = await db.insert(maintenanceReminders).values({ ...input, dueAt, nextRunAt: dueAt, organizationId: ctx.user.organizationId, createdById: ctx.user.id });
-      const reminderId = Number(result[0].insertId);
+      const result = await db.insert(maintenanceReminders).values({ ...input, dueAt, nextRunAt: dueAt, organizationId: ctx.user.organizationId, createdById: ctx.user.id }).returning({ id: maintenanceReminders.id });
+      const reminderId = result[0]?.id;
+      if (!reminderId) throw new Error(reminderError("database"));
       const sessionToken = parseCookie(ctx.req.headers.cookie ?? "")[COOKIE_NAME] ?? "";
       const cron = await createHeartbeatJob({ name: `reminder-${ctx.user.organizationId}-${reminderId}`, cron: cronForReminder(input.cadence, dueAt), path: "/api/scheduled/maintenanceReminder", payload: {}, description: `Maintainr reminder ${reminderId}` }, sessionToken);
       await db.update(maintenanceReminders).set({ scheduleCronTaskUid: cron.taskUid }).where(eq(maintenanceReminders.id, reminderId));
@@ -145,7 +146,7 @@ export const appRouter = router({
     update: managerOnly.input(z.object({ projectName: z.string().min(2).max(120), projectNameArabic: z.string().min(2).max(120), logoUrl: z.string().url().optional().or(z.literal("")), primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/), accentColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/), emailNotificationsEnabled: z.boolean(), smsNotificationsEnabled: z.boolean() })).mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db || !ctx.user.organizationId) throw new Error(reminderError("database"));
-      await db.insert(developerSettings).values({ organizationId: ctx.user.organizationId, ...input, logoUrl: input.logoUrl || null, updatedById: ctx.user.id }).onDuplicateKeyUpdate({ set: { ...input, logoUrl: input.logoUrl || null, updatedById: ctx.user.id } });
+      await db.insert(developerSettings).values({ organizationId: ctx.user.organizationId, ...input, logoUrl: input.logoUrl || null, updatedById: ctx.user.id }).onConflictDoUpdate({ target: developerSettings.organizationId, set: { ...input, logoUrl: input.logoUrl || null, updatedById: ctx.user.id } });
       return { success: true };
     }),
   }),
@@ -164,8 +165,9 @@ export const appRouter = router({
     create: protectedProcedure.input(z.object({ unitId: z.number().int().positive(), title: z.string().min(3), description: z.string().min(10), category, priority: priority.default("MEDIUM"), preferredAccessTime: z.string().optional() })).mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db || !ctx.user.organizationId) throw new Error(reminderError("database"));
-      const result = await db.insert(tickets).values({ ...input, organizationId: ctx.user.organizationId, submittedById: ctx.user.id, status: "OPEN" });
-      const ticketId = Number(result[0].insertId);
+      const result = await db.insert(tickets).values({ ...input, organizationId: ctx.user.organizationId, submittedById: ctx.user.id, status: "OPEN" }).returning({ id: tickets.id });
+      const ticketId = result[0]?.id;
+      if (!ticketId) throw new Error(reminderError("database"));
       await db.insert(ticketLogs).values({ ticketId, actorId: ctx.user.id, action: "CREATED", message: "Ticket created" });
       await sendTicketEmail({ event: "TICKET_CREATED", recipientEmail: ctx.user.email, subject: `New maintenance ticket ${ticketId}`, text: `${input.title}\n\n${input.description}` });
       return { success: true, ticketId };

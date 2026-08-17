@@ -22,8 +22,9 @@ export async function handleMaintenanceReminder(req: Request, res: Response) {
     if (!reminder.isActive) return res.json({ ok: true, skipped: "inactive" });
     const existingRun = (await db.select().from(reminderRuns).where(and(eq(reminderRuns.reminderId, reminder.id), eq(reminderRuns.occurrenceAt, reminder.nextRunAt))).limit(1))[0];
     if (existingRun && isReminderOccurrenceDuplicate(existingRun.occurrenceAt, reminder.nextRunAt)) return res.json({ ok: true, skipped: "already-processed", reminderId: reminder.id, occurrenceAt: reminder.nextRunAt });
-    const runInsert = await db.insert(reminderRuns).values({ reminderId: reminder.id, occurrenceAt: reminder.nextRunAt, status: "SENT", sentAt: new Date() });
-    const runId = Number(runInsert[0].insertId);
+    const runInsert = await db.insert(reminderRuns).values({ reminderId: reminder.id, occurrenceAt: reminder.nextRunAt, status: "SENT", sentAt: new Date() }).returning({ id: reminderRuns.id });
+    const runId = runInsert[0]?.id;
+    if (!runId) return res.status(500).json({ error: "execution-ledger-failed" });
     const settings = (await db.select().from(developerSettings).where(eq(developerSettings.organizationId, reminder.organizationId)).limit(1))[0];
     const recipients = (await db.select().from(users).where(and(eq(users.organizationId, reminder.organizationId), eq(users.role, "TENANT")))).filter(user => !reminder.unitId || user.unitId === reminder.unitId);
     if (reminder.assignedToId) {
