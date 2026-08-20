@@ -6,7 +6,7 @@ import { createDemoSession } from "./demoSessions";
 const connectionString = process.env.DEMO_DATABASE_URL!;
 let createdSessionId: string | undefined;
 
-describe("isolated demo lifecycle", () => {
+describe.runIf(process.env.RUN_DEMO_DATABASE_INTEGRATION === "true")("isolated demo lifecycle", () => {
   afterAll(async () => {
     if (!createdSessionId) return;
     const client = new Client({ connectionString, ssl: { rejectUnauthorized: false } });

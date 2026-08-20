@@ -1,7 +1,7 @@
 import { Client } from "pg";
 import { describe, expect, it } from "vitest";
 
-describe("demo database connection", () => {
+describe.runIf(process.env.RUN_DEMO_DATABASE_INTEGRATION === "true")("demo database connection", () => {
   it("connects to the isolated demo database and finds the demo-session schema", async () => {
     const connectionString = process.env.DEMO_DATABASE_URL;
     expect(connectionString, "DEMO_DATABASE_URL must be configured for the isolated demo project").toBeTruthy();
